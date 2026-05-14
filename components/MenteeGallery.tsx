@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Mentee } from '@/types';
-import { ChevronRight, Sparkles, Atom, Compass, Terminal, Flame, Users } from 'lucide-react';
+import { ChevronRight, Atom, Compass, Terminal, Sparkles } from 'lucide-react';
 
 interface MenteeGalleryProps {
   mentees: Mentee[];
@@ -13,7 +13,6 @@ export default function MenteeGallery({
 }: MenteeGalleryProps) {
   const maxMinutes = 720;
 
-  // Helper function to map string icon identifiers to clean Lucide vector components
   const renderMenteeIcon = (iconName: string, className: string) => {
     switch (iconName) {
       case 'Atom':
@@ -29,156 +28,74 @@ export default function MenteeGallery({
   };
 
   return (
-    <div className="space-y-6 animate-fade-in select-none max-w-7xl mx-auto">
-      {/* Title & Introduction Banner */}
-      <div className="bg-[#0b1120] rounded-[32px] p-6 md:p-10 text-white shadow-premium relative overflow-hidden border border-slate-800/80">
-        {/* Ambient background decoration */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-[radial-gradient(ellipse_at_top_right,rgba(37,99,235,0.12),transparent_65%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-grid-pattern-dark opacity-10 pointer-events-none" />
-
-        <div className="max-w-xl relative z-10 space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-blue-400 font-bold text-[10px] tracking-widest uppercase">
-            <Users className="w-3 h-3 text-blue-500" />
-            <span>Contract Client Roster</span>
-          </div>
-          
-          <h1 className="text-3xl md:text-4xl font-space font-bold leading-tight tracking-tight text-slate-100">
-            Mentee Management Fleet
+    <div className="space-y-8 animate-fade-in select-none max-w-7xl mx-auto">
+      {/* Huge bold pure black header */}
+      <div className="bg-[#0b1120] rounded-[32px] p-8 md:p-12 text-white">
+        <div className="max-w-2xl space-y-4">
+          <h1 className="text-4xl md:text-6xl font-space font-bold leading-tight tracking-tight text-white">
+            Mentees Gallery
           </h1>
-          
-          <p className="text-xs md:text-sm text-slate-400 font-medium leading-relaxed max-w-lg">
-            Examine core student session logs, audit degree track milestones, and query localized digital dossiers mapped to individual performance metrics.
+          <p className="text-sm text-slate-400 font-medium max-w-lg">
+            Manage individual student pipelines. Select any profile below to access their secure dossier, log session telemetry, and configure active target goals.
           </p>
         </div>
       </div>
 
-      {/* Grid of high-end Mentee Cards */}
-      <div className="grid sm:grid-cols-2 gap-6">
+      {/* Extreme luxury clean Grid */}
+      <div className="grid sm:grid-cols-2 gap-8">
         {mentees.map((mentee) => {
           const currentMins = mentee.totalMinutes || 0;
-          const pct = Math.min(100, Math.round((currentMins / maxMinutes) * 100));
-
-          // SVG Progress Ring calculations
-          const radius = 35;
-          const circumference = 2 * Math.PI * radius;
-          const strokeDashoffset = circumference - (pct / 100) * circumference;
-
           return (
             <div
               key={mentee.id}
               onClick={() => onSelectMentee(mentee.id)}
-              className="mentee-card bg-white rounded-[28px] p-6 md:p-8 border border-slate-100 shadow-premium flex flex-col justify-between cursor-pointer relative overflow-hidden group"
+              className="bg-white rounded-3xl p-8 border border-slate-100 hover:border-slate-200 transition-all cursor-pointer flex flex-col justify-between group"
             >
-              {/* Dynamic Accent glowing strip */}
-              <div
-                className="absolute top-0 left-0 right-0 h-1.5 transition-all duration-500 group-hover:h-2.5 opacity-90"
-                style={{ backgroundColor: mentee.color }}
-              />
-
-              {/* Upper Profile Box */}
               <div>
-                <div className="flex items-start justify-between gap-4 mb-5">
-                  <div className="flex items-center gap-4 min-w-0">
-                    {/* Exquisite custom icon casing */}
-                    <div
-                      className="w-14 h-14 rounded-[20px] flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105"
-                      style={{
-                        backgroundColor: `${mentee.color}10`,
-                        border: `1px solid ${mentee.color}25`,
-                        color: mentee.color,
-                      }}
-                    >
-                      {renderMenteeIcon(mentee.avatar, "w-6 h-6 stroke-[2.5]")}
-                    </div>
-                    
-                    <div className="min-w-0">
-                      <h3 className="font-space font-bold text-slate-900 text-lg group-hover:text-blue-600 transition-colors tracking-tight leading-tight truncate">
-                        {mentee.name}
-                      </h3>
-                      
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] font-bold tracking-wide px-2 py-0.5 rounded-md bg-slate-50 border border-slate-100 text-slate-600">
-                          {mentee.yearGroup}
-                        </span>
-                        <span className="text-slate-300">•</span>
-                        <span className="text-xs font-semibold text-slate-500 truncate max-w-[140px]">
-                          {mentee.subject.split('&')[0]}
-                        </span>
-                      </div>
-                    </div>
+                <div className="flex items-center justify-between mb-6">
+                  {/* Avatar Icon placeholder */}
+                  <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-900 group-hover:scale-105 transition-transform">
+                    {renderMenteeIcon(mentee.avatar || 'Sparkles', 'w-5 h-5 stroke-[2]')}
                   </div>
 
-                  {/* Streak readout (No emojis) */}
-                  {mentee.streak > 0 && (
-                    <div className="flex items-center gap-1.5 bg-amber-50/80 text-amber-800 px-3 py-1 rounded-xl border border-amber-200/60 flex-shrink-0 shadow-sm">
-                      <Flame className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
-                      <span className="text-xs font-space font-bold">{mentee.streak}w</span>
-                    </div>
-                  )}
+                  <div className="text-right">
+                    <span className="text-xs font-bold text-slate-400 block uppercase tracking-wider">
+                      Year Group
+                    </span>
+                    <span className="font-space font-bold text-sm text-slate-900">
+                      {mentee.yearGroup}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Primary Student Goals */}
-                <div className="bg-slate-50/60 rounded-2xl p-4 border border-slate-100/80 mb-6 group-hover:bg-slate-50 transition-colors">
-                  <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                    Current Degree Target
+                <h3 className="text-2xl font-space font-bold text-slate-900 tracking-tight mb-2 group-hover:text-blue-600 transition-colors">
+                  {mentee.name}
+                </h3>
+
+                <p className="text-xs text-slate-400 font-medium mb-6">
+                  {mentee.subject}
+                </p>
+
+                {/* Direct simple metrics summary */}
+                <div className="border-t border-slate-50 pt-4 grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-xs text-slate-400 block mb-0.5">Time Logged</span>
+                    <span className="font-space font-bold text-lg text-slate-900">
+                      {currentMins}m <span className="text-xs font-normal text-slate-400">/ {maxMinutes}m</span>
+                    </span>
                   </div>
-                  <p className="text-xs text-slate-800 line-clamp-2 font-medium leading-relaxed">
-                    {mentee.goal}
-                  </p>
+                  <div>
+                    <span className="text-xs text-slate-400 block mb-0.5">Active Target</span>
+                    <span className="font-space font-bold text-xs text-slate-900 line-clamp-1">
+                      {mentee.goal}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Lower Section with SVG Progress Ring & Trigger */}
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-auto">
-                {/* Custom SVG Progress Ring */}
-                <div className="flex items-center gap-3.5">
-                  <div className="relative w-16 h-16 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-full h-full transform -rotate-90">
-                      <circle
-                        cx="32"
-                        cy="32"
-                        r={radius}
-                        className="text-slate-100"
-                        strokeWidth="5"
-                        stroke="currentColor"
-                        fill="transparent"
-                      />
-                      <circle
-                        cx="32"
-                        cy="32"
-                        r={radius}
-                        strokeWidth="5"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={strokeDashoffset}
-                        strokeLinecap="round"
-                        fill="transparent"
-                        className="transition-all duration-1000 ease-out"
-                        style={{ stroke: mentee.color }}
-                      />
-                    </svg>
-                    {/* Centered Percentage */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-xs font-space font-bold text-slate-900 leading-none">
-                        {pct}%
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Absolute minutes readout */}
-                  <div>
-                    <div className="text-xs font-space font-bold text-slate-900 block">
-                      {currentMins} <span className="text-[10px] font-normal text-slate-400">/ {maxMinutes}m</span>
-                    </div>
-                    <div className="text-[10px] text-slate-400 font-semibold tracking-wide mt-0.5">
-                      Logged Time
-                    </div>
-                  </div>
-                </div>
-
-                {/* View Dossier Action Indicator Button */}
-                <div className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-100/80 flex items-center justify-center text-slate-400 group-hover:bg-[#0b1120] group-hover:text-white transition-all duration-300 shadow-sm">
-                  <ChevronRight className="w-4 h-4 stroke-[2.5]" />
-                </div>
+              <div className="mt-8 pt-4 border-t border-slate-50 flex items-center justify-between text-xs font-space font-bold text-slate-400 group-hover:text-slate-900 transition-colors">
+                <span>Access Student Dossier</span>
+                <ChevronRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           );

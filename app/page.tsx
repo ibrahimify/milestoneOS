@@ -214,6 +214,7 @@ export default function App() {
                 currentView={currentView === 'mentee-dossier' ? 'mentees' : currentView}
                 onNavigate={handleNavigate}
                 onBackToIPod={() => setCurrentView('login')}
+                isMobile={true}
               />
             </div>
           </div>
