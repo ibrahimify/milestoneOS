@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(node -e \"require\\('c:/WorkStation/Projects/milestone-mentor-dashboard/node_modules/next/dist/server/require-hook'\\)\")",
+      "Bash(node -e \"require\\('./node_modules/next/dist/server/require-hook'\\)\")",
+      "Bash(node --experimental-require-module node_modules/next/dist/bin/next build)",
+      "Bash(node --experimental-require-module node_modules/next/dist/bin/next dev --port 3000)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\muham\\.claude\\projects\\c--WorkStation-Projects-milestone-mentor-dashboard\\memory"
+    ]
+  }
+}
