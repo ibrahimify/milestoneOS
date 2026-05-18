@@ -6,6 +6,9 @@ import {
   DollarSign,
   BookOpen,
   Smartphone,
+  Circle,
+  Square,
+  Play,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -24,58 +27,63 @@ export default function Sidebar({
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'mentees', label: 'Mentees', icon: Users },
-    { id: 'calendar', label: 'Calendar Sync', icon: Calendar },
-    { id: 'finance', label: 'Finance Ledger', icon: DollarSign },
-    { id: 'resources', label: 'Syllabus', icon: BookOpen },
+    { id: 'calendar', label: 'Calendar', icon: Calendar },
+    { id: 'finance', label: 'Finance', icon: DollarSign },
+    { id: 'resources', label: 'Modules', icon: BookOpen },
   ];
 
-  const baseClasses = "flex flex-col bg-white select-none";
   const wrapperClasses = isMobile
-    ? `${baseClasses} w-full h-full`
-    : `${baseClasses} hidden md:flex w-72 min-h-screen border-r border-slate-100 fixed left-0 top-0 z-30`;
+    ? 'flex h-full w-full flex-col bg-white'
+    : 'glass-panel fixed left-6 top-6 z-30 hidden h-[calc(100vh-48px)] w-64 flex-col rounded-[28px] md:flex';
 
   return (
     <aside className={wrapperClasses}>
-      {/* Spacious Brand Header */}
-      <div className={`pt-12 pb-10 px-10 ${isMobile ? 'pt-6 pb-6 px-6' : ''}`}>
-        <div className="flex items-center gap-3.5 mb-2">
-          <div className="w-4 h-4 bg-[#0b1120]" />
-          <h1 className="font-space font-bold text-slate-900 text-xl tracking-tight">
-            Milestone OS
-          </h1>
+      <div className="px-7 pb-7 pt-8">
+        <div className="mb-8 flex items-center gap-2">
+          <Square className="h-4 w-4 fill-black" />
+          <Circle className="h-4 w-4 fill-black" />
+          <Play className="h-5 w-5 fill-black" />
         </div>
+        <h1 className="font-space text-[17px] tracking-tight text-black">
+          MILESTONE
+        </h1>
+        <p className="mt-2 text-xs text-black/40">retro mentor operating system</p>
       </div>
 
-      {/* Navigation Links */}
-      <nav className={`flex-1 space-y-2 ${isMobile ? 'px-4' : 'px-6'}`}>
+      <nav className="flex-1 space-y-2 px-5">
         {navItems.map((item) => {
-          const IconComponent = item.icon;
+          const Icon = item.icon;
           const isActive = currentView === item.id;
           return (
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-space font-bold transition-colors ${
+              className={`flex w-full items-center gap-4 rounded-2xl px-4 py-4 text-sm transition ${
                 isActive
-                  ? 'bg-[#0b1120] text-white'
-                  : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-black text-white shadow-[0_18px_34px_rgba(0,0,0,0.18)]'
+                  : 'text-black/42 hover:bg-black/[0.04] hover:text-black'
               }`}
             >
-              <IconComponent className="w-4 h-4 stroke-[2.5]" />
-              <span className="tracking-tight">{item.label}</span>
+              <Icon className="h-4 w-4 stroke-[2.4]" />
+              <span className="font-bold">{item.label}</span>
             </button>
           );
         })}
       </nav>
 
-      {/* Minimal Footer action */}
-      <div className={`p-6 ${isMobile ? 'p-4' : ''}`}>
+      <div className="p-5">
+        <div className="mb-4 rounded-[24px] bg-black p-5 text-white">
+          <div className="font-space text-[10px] leading-5">LOGS ARE MONEY</div>
+          <p className="mt-3 text-xs leading-relaxed text-white/58">
+            Every session note feeds minutes, profile memory, and finance tracking.
+          </p>
+        </div>
         <button
           onClick={onBackToIPod}
-          className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl text-xs font-space font-bold text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-xs font-bold text-black shadow-[0_14px_30px_rgba(0,0,0,0.08)] transition hover:bg-black hover:text-white"
         >
-          <Smartphone className="w-4 h-4 stroke-[2]" />
-          <span>Lock to iPod Mode</span>
+          <Smartphone className="h-4 w-4" />
+          <span>iPod lock</span>
         </button>
       </div>
     </aside>

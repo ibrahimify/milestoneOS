@@ -188,7 +188,7 @@ export default function App() {
 
   // Phase 2: Modern Professional Operating System Experience
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row relative">
+    <div className="liquid-os min-h-screen flex flex-col md:flex-row relative">
       {/* Desktop Persistent Sidebar */}
       <Sidebar
         currentView={currentView === 'mentee-dossier' ? 'mentees' : currentView}
@@ -200,14 +200,14 @@ export default function App() {
       {mobileNavOpen && (
         <div className="fixed inset-0 z-40 md:hidden flex">
           <div
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs"
+            className="fixed inset-0 bg-slate-950/42 backdrop-blur-md"
             onClick={() => setMobileNavOpen(false)}
           />
-          <div className="relative w-64 max-w-xs bg-white h-full shadow-2xl flex flex-col z-50">
+          <div className="relative w-72 max-w-xs bg-white h-full shadow-2xl flex flex-col z-50">
             {/* Direct load instance */}
-            <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+            <div className="p-4 border-b border-white/40 flex justify-between items-center">
               <span className="font-space font-bold text-sm">Navigation</span>
-              <button onClick={() => setMobileNavOpen(false)} className="text-slate-400 font-bold">✕</button>
+              <button onClick={() => setMobileNavOpen(false)} className="text-slate-400 font-bold">Close</button>
             </div>
             <div className="flex-1 overflow-y-auto">
               <Sidebar
@@ -222,7 +222,7 @@ export default function App() {
       )}
 
       {/* Primary Right Hand Layout Pane */}
-      <div className="flex-1 flex flex-col md:pl-64 min-w-0">
+      <div className="relative z-10 flex-1 flex flex-col md:pl-[19rem] min-w-0">
         <TopBar
           totalLoggedMinutes={totalLoggedMinutes}
           onOpenSidebar={() => setMobileNavOpen(true)}

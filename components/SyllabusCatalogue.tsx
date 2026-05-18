@@ -20,21 +20,24 @@ export default function SyllabusCatalogue() {
   });
 
   return (
-    <div className="space-y-8 animate-fade-in select-none max-w-7xl mx-auto">
-      {/* Huge clean bold header */}
-      <div className="bg-[#0b1120] rounded-[32px] p-8 md:p-12 text-white">
+    <div className="space-y-7 animate-fade-in select-none">
+      <div className="glass-panel-dark relative overflow-hidden rounded-[32px] p-7 text-white md:p-10">
+        <div className="absolute -right-14 -bottom-14 h-56 w-56 rounded-full bg-lime-200/14 blur-3xl" />
         <div className="max-w-2xl space-y-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-lime-100/80">
+            Module map
+          </p>
           <h1 className="text-4xl md:text-6xl font-space font-bold leading-tight tracking-tight text-white">
             Syllabus Directory
           </h1>
-          <p className="text-sm text-slate-400 font-medium max-w-lg">
-            Query verified academic delivery models. Direct vector triggers launch custom preparedness form integrations targeting backend entries.
+          <p className="text-sm text-slate-200/70 font-medium max-w-lg leading-relaxed">
+            Search modules, match them to a mentee profile, and keep suggested choices ready inside each dossier.
           </p>
         </div>
       </div>
 
       {/* Inputs / Filters row */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-100 flex flex-col lg:flex-row gap-6 justify-between items-center">
+      <div className="liquid-card rounded-[30px] p-5 flex flex-col lg:flex-row gap-5 justify-between items-center">
         {/* Simple crisp search */}
         <div className="relative w-full lg:w-96">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 stroke-[2.5]" />
@@ -43,7 +46,7 @@ export default function SyllabusCatalogue() {
             placeholder="Search module title, division, or faculty..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full text-sm pl-12 pr-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-100 text-slate-900 focus:outline-none font-space font-bold placeholder:font-sans placeholder:font-normal"
+            className="glass-input w-full text-sm pl-12 pr-4 py-3.5 rounded-2xl text-slate-900 focus:outline-none font-space font-bold placeholder:font-sans placeholder:font-normal"
           />
         </div>
 
@@ -55,8 +58,8 @@ export default function SyllabusCatalogue() {
               onClick={() => setSelectedLevel(lvl)}
               className={`px-4 py-2.5 rounded-xl text-xs font-space font-bold transition-colors ${
                 selectedLevel === lvl
-                  ? 'bg-[#0b1120] text-white'
-                  : 'bg-slate-50 text-slate-400 hover:text-slate-900'
+                  ? 'glow-button'
+                  : 'bg-white/46 text-slate-500 hover:text-slate-900 hover:bg-white/70'
               }`}
             >
               {lvl}
@@ -70,7 +73,7 @@ export default function SyllabusCatalogue() {
         {filteredModules.map((mod) => (
           <div
             key={mod.code}
-            className="bg-white rounded-3xl p-8 border border-slate-100 hover:border-slate-200 transition-all flex flex-col justify-between group"
+            className="liquid-card rounded-[30px] p-6 flex flex-col justify-between group"
           >
             <div>
               <div className="text-xs font-space font-bold text-slate-400 mb-4 block uppercase tracking-wider">
@@ -91,7 +94,7 @@ export default function SyllabusCatalogue() {
                   <strong className="text-slate-900 font-bold">{mod.teacher}</strong>
                 </div>
                 {mod.coreFor !== 'N/A' && (
-                  <div className="text-slate-900 font-space font-bold pt-1">
+                <div className="text-teal-700 font-space font-bold pt-1">
                     Core Route: {mod.coreFor}
                   </div>
                 )}
@@ -99,7 +102,7 @@ export default function SyllabusCatalogue() {
             </div>
 
             {/* Form integration link */}
-            <div className="pt-4 border-t border-slate-50">
+            <div className="pt-4 border-t border-white/50">
               {mod.formLink !== 'N/A' ? (
                 <a
                   href={mod.formLink}

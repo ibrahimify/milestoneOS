@@ -78,25 +78,29 @@ export default function CalendarGrid({
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
   return (
-    <div className="space-y-8 animate-fade-in select-none max-w-7xl mx-auto">
+    <div className="space-y-7 animate-fade-in select-none">
       {/* Huge pure black header banner */}
-      <div className="bg-[#0b1120] rounded-[32px] p-8 md:p-12 text-white">
+      <div className="glass-panel-dark relative overflow-hidden rounded-[32px] p-7 text-white md:p-10">
+        <div className="absolute -right-14 -bottom-14 h-56 w-56 rounded-full bg-teal-300/14 blur-3xl" />
         <div className="max-w-2xl space-y-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-lime-100/80">
+            Calendar sync
+          </p>
           <h1 className="text-4xl md:text-6xl font-space font-bold leading-tight tracking-tight text-white">
             {monthNames[month]} {year}
           </h1>
-          <p className="text-sm text-slate-400 font-medium max-w-lg">
-            Synchronized timeline framework. Maps instructional guidance targets, advisory sessions, and strict academic assignment deadlines.
+          <p className="text-sm text-slate-200/70 font-medium max-w-lg leading-relaxed">
+            Map advisory sessions, module deadlines, and personal follow-ups beside the mentee records.
           </p>
         </div>
       </div>
 
       {/* Navigation Controls */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="liquid-card rounded-[30px] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrevMonth}
-            className="p-3 rounded-xl hover:bg-slate-50 text-slate-900 transition-colors"
+            className="p-3 rounded-2xl hover:bg-white/60 text-slate-900 transition-colors"
             aria-label="Previous Month"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2]" />
@@ -110,7 +114,7 @@ export default function CalendarGrid({
 
           <button
             onClick={handleNextMonth}
-            className="p-3 rounded-xl hover:bg-slate-50 text-slate-900 transition-colors"
+            className="p-3 rounded-2xl hover:bg-white/60 text-slate-900 transition-colors"
             aria-label="Next Month"
           >
             <ChevronRight className="w-5 h-5 stroke-[2]" />
@@ -119,7 +123,7 @@ export default function CalendarGrid({
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#0b1120] text-white font-space font-bold text-xs hover:bg-slate-900 transition-colors"
+          className="glow-button inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl font-space font-bold text-xs transition"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Add Event</span>
@@ -127,9 +131,9 @@ export default function CalendarGrid({
       </div>
 
       {/* Grid Matrix Body */}
-      <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden">
+      <div className="liquid-card rounded-[30px] overflow-hidden">
         {/* Days Header */}
-        <div className="grid grid-cols-7 border-b border-slate-50 bg-slate-50/50 text-center">
+        <div className="grid grid-cols-7 border-b border-white/50 bg-white/32 text-center">
           {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
             <div key={d} className="py-4 text-xs font-space font-bold text-slate-400 uppercase tracking-wider">
               {d}
@@ -138,34 +142,34 @@ export default function CalendarGrid({
         </div>
 
         {/* Matrix Cells */}
-        <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-slate-50">
+        <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-white/50">
           {blanks.map((b) => (
-            <div key={`blank-${b}`} className="min-h-[120px] bg-slate-50/20 p-3" />
+            <div key={`blank-${b}`} className="min-h-[120px] bg-white/16 p-3" />
           ))}
 
           {days.map((day) => {
             const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const dayEvents = events.filter((ev) => ev.date === dateString);
-            const isSimulatedCurrent = dateString === '2026-05-13';
+            const isSimulatedCurrent = dateString === '2026-05-18';
 
             return (
               <div
                 key={`day-${day}`}
                 className={`min-h-[120px] p-3 flex flex-col justify-between transition-colors relative group ${
-                  isSimulatedCurrent ? 'bg-slate-50/80' : 'hover:bg-slate-50/30'
+                  isSimulatedCurrent ? 'bg-lime-100/32' : 'hover:bg-white/36'
                 }`}
               >
                 {/* Day Text marker */}
                 <div className="flex items-center justify-between mb-2">
                   <span
                     className={`font-space font-bold text-sm ${
-                      isSimulatedCurrent ? 'text-blue-600' : 'text-slate-900'
+                      isSimulatedCurrent ? 'text-teal-700' : 'text-slate-900'
                     }`}
                   >
                     {day}
                   </span>
                   {isSimulatedCurrent && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-teal-600" />
                   )}
                 </div>
 
@@ -174,9 +178,9 @@ export default function CalendarGrid({
                   {dayEvents.map((ev) => (
                     <div
                       key={ev.id}
-                      className="p-2 rounded-xl text-xs transition-colors relative group/ev border border-slate-100"
+                      className="p-2 rounded-xl text-xs transition-colors relative group/ev border border-white/50 backdrop-blur"
                       style={{
-                        backgroundColor: ev.type === 'deadline' ? '#fef2f2' : '#ffffff',
+                        backgroundColor: ev.type === 'deadline' ? 'rgba(254, 242, 242, 0.76)' : 'rgba(255, 255, 255, 0.58)',
                       }}
                     >
                       <div className="flex items-center justify-between gap-1">
@@ -203,7 +207,7 @@ export default function CalendarGrid({
 
                       {ev.time && (
                         <div className="text-[10px] text-slate-400 font-medium mt-1 truncate">
-                          {ev.time} {ev.description ? `• ${ev.description}` : ''}
+                          {ev.time} {ev.description ? `- ${ev.description}` : ''}
                         </div>
                       )}
                     </div>
@@ -216,7 +220,7 @@ export default function CalendarGrid({
                     setEventDate(dateString);
                     setShowAddModal(true);
                   }}
-                  className="opacity-0 group-hover:opacity-100 absolute bottom-2 right-2 w-6 h-6 rounded-lg bg-slate-100 text-slate-600 hover:bg-[#0b1120] hover:text-white flex items-center justify-center transition-colors"
+                  className="opacity-0 group-hover:opacity-100 absolute bottom-2 right-2 w-6 h-6 rounded-lg bg-white/70 text-slate-600 hover:bg-slate-950 hover:text-white flex items-center justify-center transition-colors"
                 >
                   <Plus className="w-3 h-3 stroke-[2.5]" />
                 </button>
@@ -228,9 +232,9 @@ export default function CalendarGrid({
 
       {/* Add Modal Dialog Overlay */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-[#0b1120]/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/62 backdrop-blur-lg flex items-center justify-center p-4 animate-fade-in">
+          <div className="glass-panel rounded-[30px] p-8 max-w-md w-full space-y-6">
+            <div className="flex items-center justify-between border-b border-white/50 pb-4">
               <h3 className="text-lg font-space font-bold text-slate-900 tracking-tight">
                 Add Event
               </h3>
@@ -238,7 +242,7 @@ export default function CalendarGrid({
                 onClick={() => setShowAddModal(false)}
                 className="text-xs font-space font-bold text-slate-400 hover:text-slate-900"
               >
-                ✕ Close
+                Close
               </button>
             </div>
 
@@ -253,7 +257,7 @@ export default function CalendarGrid({
                   placeholder="e.g. Code formatting framework..."
                   value={eventTitle}
                   onChange={(e) => setEventTitle(e.target.value)}
-                  className="w-full text-sm px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-900 focus:outline-none font-space font-bold"
+                  className="glass-input w-full text-sm px-4 py-3 rounded-2xl text-slate-900 focus:outline-none font-space font-bold"
                 />
               </div>
 
@@ -267,7 +271,7 @@ export default function CalendarGrid({
                     required
                     value={eventDate}
                     onChange={(e) => setEventDate(e.target.value)}
-                    className="w-full text-sm px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-900 focus:outline-none font-space font-bold"
+                    className="glass-input w-full text-sm px-4 py-3 rounded-2xl text-slate-900 focus:outline-none font-space font-bold"
                   />
                 </div>
                 <div>
@@ -278,7 +282,7 @@ export default function CalendarGrid({
                     type="time"
                     value={eventTime}
                     onChange={(e) => setEventTime(e.target.value)}
-                    className="w-full text-sm px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-900 focus:outline-none font-space font-bold"
+                    className="glass-input w-full text-sm px-4 py-3 rounded-2xl text-slate-900 focus:outline-none font-space font-bold"
                   />
                 </div>
               </div>
@@ -291,7 +295,7 @@ export default function CalendarGrid({
                   <select
                     value={eventType}
                     onChange={(e) => setEventType(e.target.value as 'session' | 'task' | 'deadline')}
-                    className="w-full text-sm px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-900 focus:outline-none font-space font-bold"
+                    className="glass-input w-full text-sm px-4 py-3 rounded-2xl text-slate-900 focus:outline-none font-space font-bold"
                   >
                     <option value="session">Session</option>
                     <option value="task">Task</option>
@@ -305,7 +309,7 @@ export default function CalendarGrid({
                   <select
                     value={eventMenteeId}
                     onChange={(e) => setEventMenteeId(e.target.value)}
-                    className="w-full text-sm px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-900 focus:outline-none font-space font-bold"
+                    className="glass-input w-full text-sm px-4 py-3 rounded-2xl text-slate-900 focus:outline-none font-space font-bold"
                   >
                     <option value="">General Roster</option>
                     {mentees.map((m) => (
@@ -326,21 +330,21 @@ export default function CalendarGrid({
                   placeholder="Optional context..."
                   value={eventDesc}
                   onChange={(e) => setEventDesc(e.target.value)}
-                  className="w-full text-sm px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-900 focus:outline-none font-space font-bold"
+                  className="glass-input w-full text-sm px-4 py-3 rounded-2xl text-slate-900 focus:outline-none font-space font-bold"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-50">
+              <div className="flex justify-end gap-3 pt-4 border-t border-white/50">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-5 py-3 rounded-xl bg-slate-50 text-slate-400 text-xs font-space font-bold hover:text-slate-900 transition-colors"
+                  className="px-5 py-3 rounded-2xl bg-white/48 text-slate-500 text-xs font-space font-bold hover:text-slate-900 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-3 rounded-xl bg-[#0b1120] text-white text-xs font-space font-bold hover:bg-slate-900 transition-colors"
+                  className="glow-button px-5 py-3 rounded-2xl text-xs font-space font-bold transition"
                 >
                   Save Event
                 </button>

@@ -68,6 +68,11 @@ export interface Mentee {
   email: string;
   skeddaLink: string;
   suggestedModules?: string[];
+  selectedModules?: string[];
+  status?: string;
+  dislikes?: string[];
+  meetingSchedule?: string;
+  moduleGuidance?: string;
   nextMeetingPreference?: string;
 }
 

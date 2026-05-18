@@ -19,9 +19,10 @@ const config: Config = {
         },
       },
       fontFamily: {
-        space: ['var(--font-space)', 'sans-serif'], // Maps Plus_Jakarta_Sans via the variable override
-        inter: ['var(--font-inter)', 'sans-serif'],
-        sans: ['var(--font-inter)', '-apple-system', 'sans-serif'],
+        pixel: ['var(--font-sans)', 'sans-serif'],
+        space: ['var(--font-sans)', 'sans-serif'],
+        inter: ['var(--font-sans)', 'sans-serif'],
+        sans: ['var(--font-sans)', '-apple-system', 'sans-serif'],
       },
       animation: {
         'bounce-x': 'bounceX 0.5s ease-in-out',

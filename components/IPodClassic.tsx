@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Battery, ChevronRight, Play, Lock, ShieldAlert, Smartphone } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Battery, ChevronRight, Lock, Play, Rewind, FastForward, Pause } from 'lucide-react';
 
 interface IPodClassicProps {
   onEnterDashboard: () => void;
@@ -10,263 +10,232 @@ interface IPodClassicProps {
   onFinance: () => void;
 }
 
+type ActionId = 'dashboard' | 'mentees' | 'finance' | 'calendar';
+
+const MENU_ITEMS: Array<{ id: ActionId; label: string; hint: string }> = [
+  { id: 'dashboard', label: 'Dashboard', hint: 'Mentor overview' },
+  { id: 'mentees', label: 'Mentees', hint: 'Student dossiers' },
+  { id: 'finance', label: 'Finance', hint: 'Contract ledger' },
+  { id: 'calendar', label: 'Calendar', hint: 'Deadlines' },
+];
+
 export default function IPodClassic({
   onEnterDashboard,
   onQuickView,
   onFinance,
 }: IPodClassicProps) {
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'mentees', label: 'Mentee Quick-View' },
-    { id: 'finance', label: 'Finance Engine' },
-  ];
-
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isZooming, setIsZooming] = useState(false);
-  
-  const [showLock, setShowLock] = useState(false);
-  const [pendingAction, setPendingAction] = useState<'dashboard' | 'mentees' | 'finance'>('dashboard');
+  const [lockOpen, setLockOpen] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState(false);
+  const [pendingAction, setPendingAction] = useState<ActionId>('dashboard');
+  const [booting, setBooting] = useState(false);
+  const [hoverZone, setHoverZone] = useState<'menu' | 'prev' | 'next' | 'play' | 'center' | null>(null);
 
-  const handleNext = () => {
-    if (showLock) return;
-    setSelectedIndex((prev) => (prev + 1) % menuItems.length);
+  const current = MENU_ITEMS[selectedIndex];
+
+  const next = () => {
+    if (lockOpen) return;
+    setSelectedIndex((prev) => (prev + 1) % MENU_ITEMS.length);
   };
 
-  const handlePrev = () => {
-    if (showLock) return;
-    setSelectedIndex((prev) => (prev - 1 + menuItems.length) % menuItems.length);
+  const prev = () => {
+    if (lockOpen) return;
+    setSelectedIndex((prev) => (prev - 1 + MENU_ITEMS.length) % MENU_ITEMS.length);
   };
 
-  const handleCenterClick = () => {
-    const selected = menuItems[selectedIndex];
-    setPendingAction(selected.id as 'dashboard' | 'mentees' | 'finance');
-    setShowLock(true);
+  const select = () => {
+    const item = MENU_ITEMS[selectedIndex];
+    setPendingAction(item.id);
+    setLockOpen(true);
     setPinInput('');
     setPinError(false);
   };
 
-  const handlePinSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (pinInput.trim() === '1619') {
-      setPinError(false);
-      setIsZooming(true);
-      setTimeout(() => {
-        if (pendingAction === 'dashboard') {
-          onEnterDashboard();
-        } else if (pendingAction === 'mentees') {
-          onQuickView();
-        } else if (pendingAction === 'finance') {
-          onFinance();
-        }
-      }, 600);
-    } else {
+  const unlock = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (pinInput !== '1619') {
       setPinError(true);
-      setTimeout(() => setPinError(false), 2000);
+      setTimeout(() => setPinError(false), 900);
+      return;
     }
-  };
 
-  const getActionContextLabel = () => {
-    switch (pendingAction) {
-      case 'mentees':
-        return 'Mentee Quick-View';
-      case 'finance':
-        return 'Finance Engine';
-      case 'dashboard':
-      default:
-        return 'Dashboard Overview';
-    }
+    setBooting(true);
+    setTimeout(() => {
+      if (pendingAction === 'dashboard') onEnterDashboard();
+      if (pendingAction === 'mentees') onQuickView();
+      if (pendingAction === 'finance') onFinance();
+      if (pendingAction === 'calendar') onEnterDashboard();
+    }, 760);
   };
 
   return (
-    <div className="min-h-screen bg-[#05070f] flex items-center justify-center p-4 select-none">
-      <AnimatePresence>
-        {!isZooming ? (
-          <motion.div
-            key="ipod-device"
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 12, opacity: 0, transition: { duration: 0.5 } }}
-            className="flex flex-col items-center p-8 rounded-[48px] w-[360px] bg-[#0b1120] border border-slate-800 shadow-2xl"
+    <div className="retro-stage flex min-h-screen items-center justify-center p-5 select-none">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10"
+      >
+        <div className="relative w-[min(86vw,310px)] rounded-[36px] border-[4px] border-black bg-[#ded5bd] px-5 pb-7 pt-7 shadow-[18px_26px_30px_rgba(0,0,0,0.30)]">
+          <div className="absolute left-1/2 top-3 h-1.5 w-12 -translate-x-1/2 rounded-full bg-black/80" />
+          <div className="absolute inset-1 rounded-[30px] border-2 border-white/40 pointer-events-none" />
+
+          <div className="relative mb-7 rounded-[12px] border-[4px] border-black bg-black p-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.24)]">
+            <div className="ipod-screen relative h-[166px] overflow-hidden rounded-[7px] bg-[#eff0eb] text-black">
+              <AnimatePresence mode="wait">
+                {booting ? (
+                  <motion.div
+                    key="boot"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 flex flex-col items-center justify-center bg-black text-white"
+                  >
+                    <div className="text-sm font-bold tracking-[0.18em]">LOADING</div>
+                    <div className="mt-4 h-4 w-40 border-2 border-white p-0.5">
+                      <div className="boot-fill h-full bg-white" />
+                    </div>
+                  </motion.div>
+                ) : lockOpen ? (
+                  <motion.div
+                    key="pin"
+                    initial={{ x: 18, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: -18, opacity: 0 }}
+                    className="absolute inset-0 bg-[#eff0eb] p-3"
+                  >
+                    <div className="flex items-center justify-between border-b-2 border-black pb-1 text-[10px] font-bold">
+                      <span>{current.label}</span>
+                      <Battery className="h-4 w-4" />
+                    </div>
+                    <form onSubmit={unlock} className="flex h-[130px] flex-col items-center justify-center text-center">
+                      <Lock className="mb-2 h-5 w-5" />
+                      <div className="text-[11px] font-bold tracking-[0.18em]">PASSCODE</div>
+                      <input
+                        type="password"
+                        autoFocus
+                        maxLength={4}
+                        value={pinInput}
+                        onChange={(event) => setPinInput(event.target.value.replace(/\D/g, ''))}
+                        className={`mt-3 w-28 border-2 border-black bg-white px-2 py-2 text-center text-sm font-bold tracking-[0.35em] outline-none ${
+                          pinError ? 'animate-bounce-x' : ''
+                        }`}
+                        placeholder="----"
+                      />
+                      <button type="submit" className="mt-3 bg-black px-4 py-1.5 text-[10px] font-bold text-white">
+                        ENTER
+                      </button>
+                    </form>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="menu"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 grid grid-cols-[59%_41%]"
+                  >
+                    <div className="border-r border-black/30 bg-[#eff0eb]">
+                      <div className="flex items-center justify-between border-b border-black/25 px-2 py-1 text-[9px] font-bold">
+                        <span>iPod</span>
+                        <span className="flex items-center gap-1">
+                          <Play className="h-3 w-3 fill-black" />
+                          <Battery className="h-4 w-4" />
+                        </span>
+                      </div>
+                      <div className="py-1">
+                        {MENU_ITEMS.map((item, index) => {
+                          const active = selectedIndex === index;
+                          return (
+                            <button
+                              key={item.id}
+                              onClick={() => setSelectedIndex(index)}
+                              className={`flex w-full items-center justify-between px-2 py-2 text-left text-[10px] font-bold ${
+                                active ? 'bg-black text-white' : 'bg-transparent text-black'
+                              }`}
+                            >
+                              <span>{item.label}</span>
+                              {active && <ChevronRight className="h-3.5 w-3.5" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="relative overflow-hidden bg-[#f8f8f4]">
+                      <div className="absolute inset-3 rounded-md border border-black/20 bg-[#eff0eb]" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center px-3 text-center">
+                        <div className="mb-3 h-8 w-8 rounded-full border border-black/30 bg-white shadow-[0_4px_10px_rgba(0,0,0,0.12)]" />
+                        <div className="text-[10px] font-bold leading-4">{current.hint}</div>
+                        <div className="mt-2 text-[9px] font-bold text-black/45">SELECT</div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          <div
+            className="relative mx-auto h-[170px] w-[170px] rounded-full bg-black text-white shadow-[inset_7px_7px_18px_rgba(255,255,255,0.08),inset_-10px_-10px_16px_rgba(0,0,0,0.62),0_8px_12px_rgba(0,0,0,0.28)]"
+            onMouseLeave={() => setHoverZone(null)}
           >
-            {/* Screen Enclosure */}
-            <div className="w-full bg-[#03050a] p-3 rounded-3xl mb-8 border border-slate-800">
-              <div className="w-full h-[220px] rounded-2xl overflow-hidden flex flex-col bg-white text-slate-900 relative">
-                
-                {/* Status bar */}
-                <div className="border-b border-slate-100 px-4 py-2 flex justify-between items-center text-[10px] font-space font-bold text-slate-900">
-                  <span>Milestone OS</span>
-                  <div className="flex items-center gap-2">
-                    <Play className="w-2.5 h-2.5 fill-slate-900" />
-                    <Battery className="w-4 h-4 stroke-[2]" />
-                  </div>
-                </div>
-
-                {/* Inner Canvas Area */}
-                <div className="flex-1 flex flex-col relative overflow-hidden">
-                  <AnimatePresence mode="wait">
-                    {showLock ? (
-                      /* PIN verification screen */
-                      <motion.div
-                        key="lock-view"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 bg-white z-20 flex flex-col items-center justify-center p-6 text-center"
-                      >
-                        <Lock className="w-5 h-5 text-slate-900 mb-2 stroke-[2.5]" />
-                        <div className="text-xs font-space font-bold text-slate-400 uppercase tracking-wider mb-1">
-                          {getActionContextLabel()}
-                        </div>
-                        <div className="text-sm font-space font-bold text-slate-900 mb-4">
-                          Enter PIN Code
-                        </div>
-
-                        <form onSubmit={handlePinSubmit} className="w-full max-w-[160px]">
-                          <input
-                            type="password"
-                            maxLength={4}
-                            autoFocus
-                            placeholder="••••"
-                            value={pinInput}
-                            onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
-                            className={`w-full text-center tracking-[0.5em] font-space font-bold text-base py-2 rounded-xl bg-slate-50 border focus:outline-none transition-colors ${
-                              pinError
-                                ? 'border-red-500 text-red-600'
-                                : 'border-slate-200 text-slate-900'
-                            }`}
-                          />
-                          
-                          {pinError && (
-                            <div className="text-[10px] text-red-600 font-bold mt-2 flex items-center justify-center gap-1 animate-pulse">
-                              <ShieldAlert className="w-3 h-3" />
-                              <span>Incorrect PIN</span>
-                            </div>
-                          )}
-
-                          <div className="flex items-center justify-between gap-2 mt-4">
-                            <button
-                              type="button"
-                              onClick={() => setShowLock(false)}
-                              className="w-1/2 py-2 bg-slate-50 hover:bg-slate-100 rounded-xl text-xs font-space font-bold text-slate-400 transition-colors"
-                            >
-                              Back
-                            </button>
-                            <button
-                              type="submit"
-                              className="w-1/2 py-2 bg-[#0b1120] hover:bg-slate-900 rounded-xl text-xs font-space font-bold text-white transition-colors"
-                            >
-                              Unlock
-                            </button>
-                          </div>
-                        </form>
-                      </motion.div>
-                    ) : (
-                      /* Main Menu screen */
-                      <motion.div
-                        key="menu-view"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 flex"
-                      >
-                        {/* List column */}
-                        <div className="w-3/5 bg-slate-50/50 py-3 flex flex-col justify-center border-r border-slate-100">
-                          <div className="px-4 pb-3 text-[9px] font-bold tracking-widest text-slate-400 uppercase">
-                            Navigation
-                          </div>
-                          {menuItems.map((item, idx) => {
-                            const isSelected = idx === selectedIndex;
-                            return (
-                              <div
-                                key={item.id}
-                                onClick={() => setSelectedIndex(idx)}
-                                className={`px-4 py-3 flex items-center justify-between text-xs transition-all cursor-pointer ${
-                                  isSelected
-                                    ? 'bg-[#0b1120] text-white font-space font-bold'
-                                    : 'text-slate-400 font-medium'
-                                }`}
-                              >
-                                <span className="truncate pr-1">{item.label}</span>
-                                {isSelected && <ChevronRight className="w-3 h-3 stroke-[2.5]" />}
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        {/* Visual brand column */}
-                        <div className="w-2/5 bg-white flex flex-col items-center justify-center p-3 text-center">
-                          <div className="w-12 h-12 rounded-2xl bg-[#0b1120] flex items-center justify-center text-white mb-3">
-                            <div className="w-3 h-3 bg-white rounded-full" />
-                          </div>
-                          <div className="text-xs font-space font-bold text-slate-900">
-                            Milestone OS
-                          </div>
-                          <div className="text-[9px] text-slate-400 font-medium mt-0.5">
-                            Core Gate
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Helper prompt bar */}
-                <div className="border-t border-slate-100 py-1.5 px-3 text-[9px] text-slate-400 text-center tracking-wider uppercase font-space font-bold bg-slate-50/50">
-                  <span>{showLock ? 'PIN required' : 'Press center trigger'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Click Wheel Hardware */}
-            <div className="relative w-[240px] h-[240px] rounded-full bg-[#0e1629] flex items-center justify-center border border-slate-800">
-              <button
-                onClick={handlePrev}
-                className="absolute top-4 left-1/2 -translate-x-1/2 text-[10px] font-space font-bold text-slate-400 hover:text-white transition-colors py-1 px-4 z-10"
-              >
-                MENU
-              </button>
-              <button
-                onClick={handleNext}
-                className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] font-space font-bold text-slate-400 hover:text-white transition-colors py-1 px-4 z-10"
-              >
-                ▶||
-              </button>
-              <button
-                onClick={handlePrev}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-space font-bold text-slate-400 hover:text-white transition-colors px-2 py-4 z-10"
-              >
-                |◀◀
-              </button>
-              <button
-                onClick={handleNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-space font-bold text-slate-400 hover:text-white transition-colors px-2 py-4 z-10"
-              >
-                ▶▶|
-              </button>
-
-              {/* Bold Center Select Button */}
-              <motion.button
-                whileTap={{ scale: 0.96 }}
-                onClick={handleCenterClick}
-                className="relative z-10 w-[90px] h-[90px] rounded-full bg-[#060a14] border border-slate-800 flex items-center justify-center group focus:outline-none shadow-inner"
-                aria-label="Trigger center select"
-              >
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-800 group-hover:bg-white transition-colors" />
-              </motion.button>
-            </div>
-
-            {/* Footer sub text */}
-            <div className="mt-8 text-center flex items-center justify-center gap-2 text-slate-500">
-              <Smartphone className="w-3.5 h-3.5 stroke-[2]" />
-              <span className="text-xs font-space font-bold tracking-wider uppercase">
-                Hardware Access Frame
-              </span>
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+            <div
+              className={`pointer-events-none absolute inset-2 rounded-full transition ${
+                hoverZone ? 'bg-white/8' : 'bg-transparent'
+              }`}
+            />
+            <button
+              onMouseEnter={() => setHoverZone('menu')}
+              onClick={() => setLockOpen(false)}
+              className={`absolute left-1/2 top-4 -translate-x-1/2 rounded-full px-4 py-2 text-[9px] font-bold transition ${
+                hoverZone === 'menu' ? 'bg-white text-black' : ''
+              }`}
+            >
+              MENU
+            </button>
+            <button
+              onMouseEnter={() => setHoverZone('prev')}
+              onClick={prev}
+              aria-label="Previous"
+              className={`absolute left-4 top-1/2 -translate-y-1/2 rounded-full p-3 transition ${
+                hoverZone === 'prev' ? 'bg-white text-black' : ''
+              }`}
+            >
+              <Rewind className="h-4 w-4 fill-current" />
+            </button>
+            <button
+              onMouseEnter={() => setHoverZone('next')}
+              onClick={next}
+              aria-label="Next"
+              className={`absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-3 transition ${
+                hoverZone === 'next' ? 'bg-white text-black' : ''
+              }`}
+            >
+              <FastForward className="h-4 w-4 fill-current" />
+            </button>
+            <button
+              onMouseEnter={() => setHoverZone('play')}
+              onClick={next}
+              aria-label="Play pause"
+              className={`absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full p-3 transition ${
+                hoverZone === 'play' ? 'bg-white text-black' : ''
+              }`}
+            >
+              <Pause className="h-4 w-4 fill-current" />
+            </button>
+            <button
+              onMouseEnter={() => setHoverZone('center')}
+              onClick={select}
+              aria-label="Select"
+              className={`absolute left-[51px] top-[51px] h-[68px] w-[68px] rounded-full border-2 border-black bg-[#242424] shadow-[inset_5px_5px_12px_rgba(255,255,255,0.08),inset_-6px_-6px_12px_rgba(0,0,0,0.7)] transition active:scale-[0.96] ${
+                hoverZone === 'center' ? 'ring-4 ring-white/25' : ''
+              }`}
+            />
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }
