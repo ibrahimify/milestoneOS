@@ -42,6 +42,8 @@ Open [Milestone OS locally](http://localhost:3000). Run `npm run lint`, `npm run
 
 ## Deploy
 
+The [live app](https://milestone-os-two.vercel.app) deploys from the `master` branch of this repository.
+
 Import the repository into Vercel and add the variables from [`.env.example`](.env.example) in the project settings. Use the production URL for `APP_URL` and the Supabase Auth Site URL. Follow the [setup guide](docs/setup.md) for database migrations, email delivery, and the first administrator.
 
 [System diagrams](docs/architecture.md) · [Release notes](https://github.com/ibrahimify/milestoneOS/releases) · [Report a bug](https://github.com/ibrahimify)
