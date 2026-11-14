@@ -1,3 +1,10 @@
+import type { Session } from '@/types';
+
+export function newestSessionFirst(a: Session, b: Session) {
+  const timestamp = (session: Session) => Date.parse(session.created_at ?? '') || 0;
+  return b.date.localeCompare(a.date) || timestamp(b) - timestamp(a) || b.id.localeCompare(a.id);
+}
+
 export function localDate(date = new Date()) {
   return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
 }

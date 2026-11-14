@@ -35,6 +35,7 @@ export interface Session {
   id: string;
   mentee_id: string;
   date: string;
+  created_at?: string | null;
   duration: number;
   topic: string;
   notes: string;

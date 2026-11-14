@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowLeft, ArrowUpRight, BookOpen, CalendarDays, Check, Clock, Compass, Mail, NotebookPen, Pencil, Phone, Plus, Target, Trash2, UserRound } from 'lucide-react';
 import { deleteRecord, saveRecord, toggleFollowUp } from '@/app/actions';
-import { formatDate, localDate } from '@/lib/utils';
+import { formatDate, localDate, newestSessionFirst } from '@/lib/utils';
 import { yearGroups, type Mentee, type ModuleSyllabus, type Session } from '@/types';
 import { ActionButton, Field, RecordForm, numberValue } from './Forms';
 import ModulePicker from './ModulePicker';
@@ -28,7 +28,7 @@ export default function MenteeDossier({ mentee, sessions, modules, initialSessio
   }, [initialSession]);
   const phone = mentee.phone.replace(/[^\d+]/g, '');
   const minutes = sessions.reduce((sum, item) => sum + item.duration, 0);
-  const orderedSessions = [...sessions].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  const orderedSessions = [...sessions].sort(newestSessionFirst);
   const update = (values: Record<string, string>) => saveRecord('mentees', values, mentee.id);
   return <div className="view-stack">
     <div className="section-heading">

@@ -129,6 +129,21 @@ button:disabled { opacity: .55; cursor: default; }
 .field, .player-form label { display: grid; gap: .3rem; font-size: .875rem; font-weight: 640; min-width: 0; }
 .field input, .field select, .field textarea, .player-form input { font-size: 1rem; font-weight: 470; }
 .field textarea { resize: vertical; }
+.password-input { position: relative; min-width: 0; }
+.field .password-input input { padding-inline-end: 3rem; }
+.password-input input::-ms-reveal { display: none; }
+.password-input button {
+  position: absolute; inset-block: 1px; inset-inline-end: 1px; width: 2.65rem;
+  display: grid; place-items: center; border-radius: 8px; color: var(--muted);
+}
+.password-input button:hover { background: #1717170b; color: var(--ink); }
+.password-input button:focus-visible { outline-offset: -3px; }
+.account-confirmation {
+  display: flex; align-items: flex-start; gap: .7rem; margin-top: .9rem; padding: .8rem .9rem;
+  border-radius: 12px; border: 1px solid #cadfd1; background: #edf6f0; color: #1d472e;
+}
+.account-confirmation svg { flex: none; }
+.account-confirmation p { margin-top: .15rem; font-size: .875rem; }
 .amount { font-variant-numeric: tabular-nums; }
 .workspace {
   --ink: #050505;
@@ -298,6 +313,11 @@ button:disabled { opacity: .55; cursor: default; }
 .calendar-export-options .button { justify-content: space-between; text-align: left; }
 .account-button { flex-shrink: 0; border-radius: 50%; box-shadow: var(--shadow); }
 .workspace-header .greeting { overflow-wrap: anywhere; }
+@media (max-width: 400px) {
+  .workspace-header { gap: .4rem; }
+  .minutes-pill { padding: .5rem .55rem; white-space: nowrap; }
+  .minutes-pill svg { display: none; }
+}
 @media (pointer: fine) and (hover: hover) and (forced-colors: none) {
   .workspace { cursor: url('/milestone-arrow.svg') 5 4, auto; }
   .workspace :is(a, button, summary):not(:disabled) { cursor: url('/milestone-hand.svg') 13 4, pointer; }
@@ -409,7 +429,11 @@ button:disabled { opacity: .55; cursor: default; }
 .player-menu button:hover:not(.selected) { background: #edf0f3; }
 .player-form, .player-message { padding: .3rem .5rem; font-size: .75rem; }
 .player-form { display: grid; gap: .25rem; }
-.player-form label { grid-template-columns: minmax(57px, auto) 1fr; align-items: center; font-size: .75rem; }
+.player-form > label, .player-password-row { grid-template-columns: 66px minmax(0, 1fr); align-items: center; font-size: .75rem; }
+.player-password-row { display: grid; gap: .3rem; }
+.player-form .password-input input { padding-inline-end: 2.15rem; }
+.player-form .password-input button { width: 1.9rem; border-radius: 2px; color: #47515a; }
+.player-form .password-input button svg { width: 15px; height: 15px; }
 .player-form input {
   min-height: 32px;
   font-size: .75rem;

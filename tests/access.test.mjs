@@ -25,7 +25,7 @@ test('approval, tenant isolation and shared resources', async (t) => {
     $$;
     grant usage on schema auth to authenticated;
   `);
-  for (const filename of ['202611140001_workspace.sql', '202611140002_module_catalogue.sql', '202611140003_profile_nickname.sql', '202611140004_follow_up_completion.sql']) {
+  for (const filename of ['202611140001_workspace.sql', '202611140002_module_catalogue.sql', '202611140003_profile_nickname.sql', '202611140004_follow_up_completion.sql', '202611150005_session_creation_time.sql']) {
     await db.exec(await readFile(new URL('../supabase/migrations/' + filename, import.meta.url), 'utf8'));
   }
   for (const [index, user] of [admin, mentorA, mentorB, pending].entries()) {
@@ -65,7 +65,8 @@ test('approval, tenant isolation and shared resources', async (t) => {
   await assert.rejects(db.query("insert into calendar_events(title,date,category,shared) values ('Fake','2026-11-20','Meeting',true)"), { code: '42501' });
   const [{ id: mentee }] = await result("insert into mentees(name,year_group) values ('Private','Senior') returning id");
   const [{ id: otherMentee }] = await result("insert into mentees(name,year_group) values ('Second','Junior') returning id");
-  const [{ id: session }] = await result("insert into sessions(mentee_id,date,duration,topic) values ($1,'2026-11-20',30,'Session') returning id", [mentee]);
+  const [{ id: session, created_at: createdAt }] = await result("insert into sessions(mentee_id,date,duration,topic) values ($1,'2026-11-20',30,'Session') returning id, created_at", [mentee]);
+  assert.ok(createdAt instanceof Date);
   await db.query("update sessions set next_action='Send shortlist', follow_up='2026-11-24' where id=$1", [session]);
   await db.query("update sessions set follow_up_completed_at=now() where id=$1", [session]);
   await db.query("update sessions set notes='Updated notes' where id=$1", [session]);

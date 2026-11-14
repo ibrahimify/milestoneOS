@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { ChevronDown, X } from 'lucide-react';
 import type { ActionResult } from '@/app/actions';
+import PasswordInput from './PasswordInput';
 
 export type Values = Record<string, string>;
 export const numberValue = (values: Values, name: string) => Number(values[name]);
@@ -22,6 +23,8 @@ export function Field({ name, label, value, type = 'text', options, required, ma
       })}
     </select><ChevronDown size={16} aria-hidden="true" /></div> : type === 'textarea'
       ? <textarea id={id} name={name} defaultValue={value ?? ''} maxLength={limit || 6000} rows={3} required={required} />
+      : type === 'password' ? <PasswordInput id={id} name={name} label={label} defaultValue={value ?? ''} required={required}
+          maxLength={limit || 160} minLength={minLength} autoComplete={autoComplete} />
       : <input id={id} name={name} defaultValue={value ?? ''} type={type} required={required} placeholder={placeholder}
           min={min} max={max} step={step} maxLength={limit || 160} minLength={minLength} autoComplete={autoComplete} />}
   </div>;

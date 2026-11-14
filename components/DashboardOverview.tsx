@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CalendarDays, ChevronRight, Clock, NotebookPen, Users, Wallet } from 'lucide-react';
 import type { WorkspaceData } from '@/types';
-import { formatCurrency, formatDate, localDate } from '@/lib/utils';
+import { formatCurrency, formatDate, localDate, newestSessionFirst } from '@/lib/utils';
 import type { View } from './Sidebar';
 
 export default function DashboardOverview({ data, navigate, openMentee }: {
@@ -14,7 +14,7 @@ export default function DashboardOverview({ data, navigate, openMentee }: {
   const followUps = data.sessions.filter((item) => item.follow_up && !item.follow_up_completed_at)
     .sort((a, b) => a.follow_up!.localeCompare(b.follow_up!)).slice(0, 3);
   const outstanding = data.payments.filter((item) => !item.received_at).reduce((sum, item) => sum + item.amount, 0);
-  const recent = [...data.sessions].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 4);
+  const recent = [...data.sessions].sort(newestSessionFirst).slice(0, 4);
   const stats = [
     { label: 'Mentees', value: data.mentees.length, Icon: Users },
     { label: 'Session logs', value: data.sessions.length, Icon: NotebookPen },

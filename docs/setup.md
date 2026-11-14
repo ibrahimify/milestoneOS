@@ -24,12 +24,13 @@
 
 ## Update an existing project
 
-For a project that already has the workspace and catalogue tables from the first two migrations:
+For a project that already has the workspace and catalogue tables, apply only the migrations that are missing. If you manage migrations manually, open **SQL Editor → New query**, paste the full SQL file, and click **Run**.
 
-1. Open **SQL Editor → New query** in the project's Supabase dashboard.
-2. Paste the full [nickname migration](../supabase/migrations/202611140003_profile_nickname.sql) and click **Run**.
-3. Open a new query, paste the full [follow-up migration](../supabase/migrations/202611140004_follow_up_completion.sql), and click **Run**.
-4. Reload the app. Open the profile icon in the top-right corner, choose **Profile**, enter a nickname, and click **Save nickname**. The greeting updates after saving.
+1. [Nickname](../supabase/migrations/202611140003_profile_nickname.sql)
+2. [Follow-up completion](../supabase/migrations/202611140004_follow_up_completion.sql)
+3. [Session creation time](../supabase/migrations/202611150005_session_creation_time.sql). This records when new logs are added so logs from the same day can be ordered. Existing logs do not need a backfill.
+
+To change your own nickname, open the profile icon in the top-right corner, choose **Profile**, enter a nickname, and click **Save nickname**. The greeting updates after saving.
 
 ## Change your password
 

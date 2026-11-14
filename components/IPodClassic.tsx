@@ -1,8 +1,9 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState, type PointerEvent } from 'react';
+import { useActionState, useEffect, useId, useRef, useState, type PointerEvent } from 'react';
 import { ChevronRight, Play, SkipBack, SkipForward } from 'lucide-react';
 import { authenticate, type AuthResult } from '@/app/auth/actions';
+import PasswordInput from './PasswordInput';
 
 const modes = [
   { id: 'signin', label: 'Sign in' },
@@ -105,6 +106,7 @@ export default function IPodClassic({ unavailable, expired, updating, status, si
 }
 
 function Credentials({ mode, label, adminEntry }: { mode: string; label: string; adminEntry?: boolean }) {
+  const passwordId = useId();
   const [result, action, pending] = useActionState(async (previous: AuthResult, form: FormData) => {
     try {
       return await authenticate(previous, form);
@@ -120,8 +122,10 @@ function Credentials({ mode, label, adminEntry }: { mode: string; label: string;
     {adminEntry && mode === 'signin' && <input type="hidden" name="view" value="admin" />}
     {mode === 'signup' && <label>Nickname<input name="nickname" autoComplete="nickname" maxLength={60} required /></label>}
     {mode !== 'update' && <label>Email<input name="email" type="email" autoComplete="email" maxLength={254} required /></label>}
-    {mode !== 'reset' && <label>Password<input name="password" type="password" maxLength={72}
-      minLength={mode === 'signin' ? 1 : 10} autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} required /></label>}
+    {mode !== 'reset' && <div className="player-password-row"><label htmlFor={passwordId}>Password</label>
+      <PasswordInput id={passwordId} label="Password" name="password" maxLength={72}
+        minLength={mode === 'signin' ? 1 : 10} autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} required />
+    </div>}
     <button className="button primary" disabled={pending}>{pending ? 'Please wait…' : label}</button>
     {result.error && <p role="alert" className="error-text">{result.error}</p>}
     {result.message && <p role="status">{result.message}</p>}
