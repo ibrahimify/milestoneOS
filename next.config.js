@@ -1,15 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  // Exclude the legacy sub-project from compilation
-  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
-  webpack(config) {
-    config.watchOptions = {
-      ...config.watchOptions,
-      ignored: /milestone-mentor-app/,
-    };
-    return config;
+  poweredByHeader: false,
+  async headers() {
+    return [{
+      source: '/:path*',
+      headers: [
+        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        { key: 'X-Frame-Options', value: 'DENY' },
+      ],
+    }];
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

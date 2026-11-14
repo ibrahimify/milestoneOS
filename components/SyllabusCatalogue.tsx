@@ -1,130 +1,83 @@
-import React, { useState } from 'react';
-import { availableModules } from '@/lib/mockData';
-import { BookOpen, ExternalLink, Search } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowUpRight, BookOpen, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { deleteRecord, saveRecord } from '@/app/actions';
+import { safeLink } from '@/lib/utils';
+import type { ModuleCategory, ModuleSyllabus } from '@/types';
+import { ActionButton, Field, FormDialog } from './Forms';
 
-export default function SyllabusCatalogue() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedLevel, setSelectedLevel] = useState('All');
-
-  const levels = ['All', 'Freshman Module', 'Orientation', 'Immersion 1', 'Immersion 2', 'Focus'];
-
-  const filteredModules = availableModules.filter((mod) => {
-    const matchesSearch =
-      mod.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mod.division.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mod.teacher.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesLevel = selectedLevel === 'All' || mod.level.includes(selectedLevel);
-
-    return matchesSearch && matchesLevel;
-  });
-
-  return (
-    <div className="space-y-7 animate-fade-in select-none">
-      <div className="glass-panel-dark relative overflow-hidden rounded-[32px] p-7 text-white md:p-10">
-        <div className="absolute -right-14 -bottom-14 h-56 w-56 rounded-full bg-lime-200/14 blur-3xl" />
-        <div className="max-w-2xl space-y-4">
-          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-lime-100/80">
-            Module map
-          </p>
-          <h1 className="text-4xl md:text-6xl font-space font-bold leading-tight tracking-tight text-white">
-            Syllabus Directory
-          </h1>
-          <p className="text-sm text-slate-200/70 font-medium max-w-lg leading-relaxed">
-            Search modules, match them to a mentee profile, and keep suggested choices ready inside each dossier.
-          </p>
-        </div>
-      </div>
-
-      {/* Inputs / Filters row */}
-      <div className="liquid-card rounded-[30px] p-5 flex flex-col lg:flex-row gap-5 justify-between items-center">
-        {/* Simple crisp search */}
-        <div className="relative w-full lg:w-96">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 stroke-[2.5]" />
-          <input
-            type="text"
-            placeholder="Search module title, division, or faculty..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="glass-input w-full text-sm pl-12 pr-4 py-3.5 rounded-2xl text-slate-900 focus:outline-none font-space font-bold placeholder:font-sans placeholder:font-normal"
-          />
-        </div>
-
-        {/* Level Filters */}
-        <div className="flex flex-wrap gap-2 w-full lg:w-auto justify-end">
-          {levels.map((lvl) => (
-            <button
-              key={lvl}
-              onClick={() => setSelectedLevel(lvl)}
-              className={`px-4 py-2.5 rounded-xl text-xs font-space font-bold transition-colors ${
-                selectedLevel === lvl
-                  ? 'glow-button'
-                  : 'bg-white/46 text-slate-500 hover:text-slate-900 hover:bg-white/70'
-              }`}
-            >
-              {lvl}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Grid Results */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredModules.map((mod) => (
-          <div
-            key={mod.code}
-            className="liquid-card rounded-[30px] p-6 flex flex-col justify-between group"
-          >
-            <div>
-              <div className="text-xs font-space font-bold text-slate-400 mb-4 block uppercase tracking-wider">
-                {mod.level}
-              </div>
-
-              <h3 className="text-xl font-space font-bold text-slate-900 leading-snug mb-4 group-hover:text-blue-600 transition-colors">
-                {mod.title}
-              </h3>
-
-              <div className="space-y-2 text-xs text-slate-400 font-medium mb-8">
-                <div>
-                  <span className="text-slate-400">Division: </span>
-                  <strong className="text-slate-900 font-bold">{mod.division}</strong>
-                </div>
-                <div>
-                  <span className="text-slate-400">Faculty: </span>
-                  <strong className="text-slate-900 font-bold">{mod.teacher}</strong>
-                </div>
-                {mod.coreFor !== 'N/A' && (
-                <div className="text-teal-700 font-space font-bold pt-1">
-                    Core Route: {mod.coreFor}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Form integration link */}
-            <div className="pt-4 border-t border-white/50">
-              {mod.formLink !== 'N/A' ? (
-                <a
-                  href={mod.formLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-between py-2 text-xs font-space font-bold text-slate-900 hover:text-blue-600 transition-colors"
-                >
-                  <span className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 stroke-[2.5]" />
-                    <span>Motivation Form</span>
-                  </span>
-                  <ExternalLink className="w-4 h-4 stroke-[2]" />
-                </a>
-              ) : (
-                <div className="text-xs font-space font-bold text-slate-400 py-2">
-                  Direct Core Group Allocation
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+export default function SyllabusCatalogue({ modules, categories, admin }: {
+  modules: ModuleSyllabus[]; categories: ModuleCategory[]; admin: boolean;
+}) {
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
+  const [editingModule, setModule] = useState<ModuleSyllabus | 'new'>();
+  const [editingCategory, setEditingCategory] = useState<ModuleCategory | 'new'>();
+  const moduleItem = editingModule === 'new' ? undefined : editingModule;
+  const categoryItem = editingCategory === 'new' ? undefined : editingCategory;
+  const selected = categories.find(({ id }) => id === category);
+  const results = modules.filter((item) => (!selected || item.category_id === selected.id)
+    && [item.title, item.division, item.faculty].join(' ').toLowerCase().includes(search.trim().toLowerCase()));
+  return <div className="view-stack">
+    <div className="section-heading workspace-hero"><h1>Modules</h1>
+      {admin && <div className="actions">
+        <button className="button hero-secondary" onClick={() => setEditingCategory('new')}>Add category</button>
+        {categories.length > 0 && <button className="button primary" onClick={() => setModule('new')}><Plus size={17} />Add module</button>}
+      </div>}
     </div>
-  );
+    {categories.length > 0 && <>
+      <div className="panel module-filters">
+        <label className="search"><Search size={18} /><input type="search" aria-label="Search modules"
+          placeholder="Search modules" value={search} onChange={(event) => setSearch(event.target.value)} /></label>
+        <div className="category-filters" role="group" aria-label="Filter by category">
+          <button type="button" aria-pressed={!selected} onClick={() => setCategory('')}>All</button>
+          {categories.map(({ id, name }) => <button type="button" key={id} aria-pressed={selected?.id === id}
+            onClick={() => setCategory(id)}>{name}</button>)}
+        </div>
+      </div>
+      {admin && selected && <div className="actions">
+        <button className="button" onClick={() => setEditingCategory(selected)}>Edit category</button>
+        <ActionButton confirm="Delete this category?" className="button danger" run={() => deleteRecord('module_categories', selected.id)}>Delete category</ActionButton>
+      </div>}
+    </>}
+    {!results.length && <div className="panel empty">{modules.length ? 'No modules match these filters.' : 'No modules have been published.'}</div>}
+    <div className="module-grid">
+      {results.map((item) => {
+        const link = safeLink(item.form_link);
+        return <article className="panel module-card" key={item.id}>
+          <div>
+            <p className="card-caption">{categories.find((parent) => parent.id === item.category_id)?.name}</p>
+            <h2 className="mt-2 break-words">{item.title}</h2>
+            {item.division && <p className="muted mt-3 break-words">Division: <strong>{item.division}</strong></p>}
+            {item.faculty && <p className="muted mt-1 break-words">Faculty: <strong>{item.faculty}</strong></p>}
+            {item.description && <p className="mt-3 whitespace-pre-wrap break-words">{item.description}</p>}
+          </div>
+          {(link || admin) && <div className="module-card-footer">
+            {link && <a className="module-form-link" href={link} target="_blank" rel="noreferrer">
+              <BookOpen size={16} aria-hidden="true" /><span>Open form</span><ArrowUpRight size={14} aria-hidden="true" />
+            </a>}
+            {admin && <div className="module-card-tools">
+              <button className="icon-button" title="Edit module" aria-label={'Edit module: ' + item.title}
+                onClick={() => setModule(item)}><Pencil size={15} /></button>
+              <ActionButton confirm="Delete this module?" className="icon-button danger" label={'Delete module: ' + item.title}
+                run={() => deleteRecord('modules', item.id)}><Trash2 size={15} /></ActionButton>
+            </div>}
+          </div>}
+        </article>;
+      })}
+    </div>
+    {editingCategory && <FormDialog title={categoryItem ? 'Edit category' : 'Add category'} close={() => setEditingCategory(undefined)}
+      save={(values) => saveRecord('module_categories', values, categoryItem?.id)}>
+      <Field name="name" label="Name" value={categoryItem?.name} limit={80} required />
+    </FormDialog>}
+    {editingModule && <FormDialog title={moduleItem ? 'Edit module' : 'Add module'} close={() => setModule(undefined)}
+      save={(values) => saveRecord('modules', values, moduleItem?.id)}>
+      <Field name="title" label="Title" value={moduleItem?.title} required />
+      <Field name="category_id" label="Category" required value={moduleItem?.category_id || selected?.id}
+        options={categories.map(({ id, name }) => ({ value: id, label: name }))} />
+      <Field name="division" label="Division" value={moduleItem?.division} />
+      <Field name="faculty" label="Faculty" value={moduleItem?.faculty} />
+      <Field name="description" label="Description" type="textarea" value={moduleItem?.description} />
+      <Field name="form_link" label="Form link" type="url" limit={2048} value={moduleItem?.form_link} />
+    </FormDialog>}
+  </div>;
 }

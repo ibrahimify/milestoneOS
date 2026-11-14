@@ -1,241 +1,129 @@
 'use client';
 
-import React, { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Battery, ChevronRight, Lock, Play, Rewind, FastForward, Pause } from 'lucide-react';
+import { useActionState, useEffect, useRef, useState, type PointerEvent } from 'react';
+import { ChevronRight, Play, SkipBack, SkipForward } from 'lucide-react';
+import { authenticate, type AuthResult } from '@/app/auth/actions';
 
-interface IPodClassicProps {
-  onEnterDashboard: () => void;
-  onQuickView: () => void;
-  onFinance: () => void;
+const modes = [
+  { id: 'signin', label: 'Sign in' },
+  { id: 'signup', label: 'Request access' },
+  { id: 'reset', label: 'Reset password' },
+] as const;
+
+export default function IPodClassic({ unavailable, expired, updating, status, signOutAction, adminEntry }: {
+  unavailable?: boolean; expired?: boolean; updating?: boolean; status?: string;
+  signOutAction?: () => Promise<void>; adminEntry?: boolean;
+}) {
+  const [selected, setSelected] = useState(0);
+  const [open, setOpen] = useState(!!updating);
+  const wheelAngle = useRef<number | null>(null);
+  const wheelScroll = useRef(0);
+  const mode = updating ? { id: 'update', label: 'Set new password' } : modes[selected];
+  const move = (change: number) => setSelected((i) => (i + change + modes.length) % modes.length);
+  const menu = !open && !unavailable && !status;
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const node = menuRef.current;
+    if (!node) return;
+    function scroll(event: WheelEvent) {
+      event.preventDefault();
+      wheelScroll.current += event.deltaY;
+      if (Math.abs(wheelScroll.current) < 24 && event.deltaMode === 0) return;
+      const direction = Math.sign(wheelScroll.current);
+      wheelScroll.current = 0;
+      setSelected((i) => (i + direction + modes.length) % modes.length);
+    }
+    node.addEventListener('wheel', scroll, { passive: false });
+    return () => node.removeEventListener('wheel', scroll);
+  }, [menu]);
+
+  function angle(event: PointerEvent<HTMLDivElement>) {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    return Math.atan2(event.clientY - bounds.top - bounds.height / 2, event.clientX - bounds.left - bounds.width / 2);
+  }
+
+  function rotate(event: PointerEvent<HTMLDivElement>) {
+    if (wheelAngle.current === null) return;
+    const next = angle(event);
+    const delta = Math.atan2(Math.sin(next - wheelAngle.current), Math.cos(next - wheelAngle.current));
+    const steps = Math.trunc(delta / (Math.PI / 5));
+    if (steps) {
+      wheelAngle.current = next;
+      move(steps);
+    }
+  }
+
+  return <main className="entry-stage">
+    <div className="player-frame">
+    <section className="player" aria-label="Milestone OS account access">
+      <div className="player-jack" aria-hidden="true" />
+      <div className="player-hold" aria-hidden="true" />
+      <div className="player-screen">
+        <header className="player-status"><span>{open ? mode.label : 'Milestone OS'}</span><span className="battery" aria-hidden="true" /></header>
+        <div className="player-screen-content">
+        {unavailable ? <p className="player-message">Workspace setup is required.</p>
+        : status ? <div className="player-message">
+          <p>{status}</p>
+          <form action={signOutAction} className="mt-4"><button className="button primary">Sign out</button></form>
+        </div>
+        : open ? <Credentials key={mode.id} mode={mode.id} label={mode.label} adminEntry={adminEntry} />
+        : <div className="player-menu" ref={menuRef} onKeyDown={(event) => {
+          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            const index = (selected + (event.key === 'ArrowDown' ? 1 : -1) + modes.length) % modes.length;
+            setSelected(index);
+            event.currentTarget.querySelectorAll('button')[index]?.focus();
+          }
+        }}>
+          {modes.map((item, index) => <button key={item.id} type="button"
+            className={index === selected ? 'selected' : ''}
+            onFocus={() => setSelected(index)}
+            onClick={() => { setSelected(index); setOpen(true); }}>
+            {item.label}<ChevronRight size={13} aria-hidden="true" />
+          </button>)}
+          {expired && <p className="player-message" role="alert">That link has expired. Request a new link.</p>}
+        </div>}
+        </div>
+      </div>
+      <div className="click-wheel" role="group" aria-label="Menu controls">
+        {menu && <div className="wheel-ring" aria-hidden="true" onPointerDown={(event) => {
+          wheelAngle.current = angle(event);
+          event.currentTarget.setPointerCapture(event.pointerId);
+        }} onPointerMove={rotate} onLostPointerCapture={() => { wheelAngle.current = null; }} />}
+        <button className="wheel-menu" disabled={!open || updating} onClick={() => setOpen(false)}>MENU</button>
+        <button className="wheel-up" disabled={!menu} aria-label="Previous option" onClick={() => move(-1)}><SkipBack size={16} fill="currentColor" /></button>
+        <button className="wheel-select" type="button" disabled={!menu} aria-label={'Select ' + modes[selected].label} onClick={() => setOpen(true)} />
+        <button className="wheel-down" disabled={!menu} aria-label="Next option" onClick={() => move(1)}><SkipForward size={16} fill="currentColor" /></button>
+        <button className="wheel-play" type="submit" form="ipod-credentials" disabled={!open} aria-label="Submit form">
+          <Play size={11} fill="currentColor" aria-hidden="true" /><span aria-hidden="true">Ⅱ</span>
+        </button>
+      </div>
+    </section>
+    </div>
+  </main>;
 }
 
-type ActionId = 'dashboard' | 'mentees' | 'finance' | 'calendar';
-
-const MENU_ITEMS: Array<{ id: ActionId; label: string; hint: string }> = [
-  { id: 'dashboard', label: 'Dashboard', hint: 'Mentor overview' },
-  { id: 'mentees', label: 'Mentees', hint: 'Student dossiers' },
-  { id: 'finance', label: 'Finance', hint: 'Contract ledger' },
-  { id: 'calendar', label: 'Calendar', hint: 'Deadlines' },
-];
-
-export default function IPodClassic({
-  onEnterDashboard,
-  onQuickView,
-  onFinance,
-}: IPodClassicProps) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [lockOpen, setLockOpen] = useState(false);
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState(false);
-  const [pendingAction, setPendingAction] = useState<ActionId>('dashboard');
-  const [booting, setBooting] = useState(false);
-  const [hoverZone, setHoverZone] = useState<'menu' | 'prev' | 'next' | 'play' | 'center' | null>(null);
-
-  const current = MENU_ITEMS[selectedIndex];
-
-  const next = () => {
-    if (lockOpen) return;
-    setSelectedIndex((prev) => (prev + 1) % MENU_ITEMS.length);
-  };
-
-  const prev = () => {
-    if (lockOpen) return;
-    setSelectedIndex((prev) => (prev - 1 + MENU_ITEMS.length) % MENU_ITEMS.length);
-  };
-
-  const select = () => {
-    const item = MENU_ITEMS[selectedIndex];
-    setPendingAction(item.id);
-    setLockOpen(true);
-    setPinInput('');
-    setPinError(false);
-  };
-
-  const unlock = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (pinInput !== '1619') {
-      setPinError(true);
-      setTimeout(() => setPinError(false), 900);
-      return;
+function Credentials({ mode, label, adminEntry }: { mode: string; label: string; adminEntry?: boolean }) {
+  const [result, action, pending] = useActionState(async (previous: AuthResult, form: FormData) => {
+    try {
+      return await authenticate(previous, form);
+    } catch (error) {
+      if (error instanceof TypeError) {
+        return { error: 'The connection was interrupted. Refresh this page and try again.' };
+      }
+      throw error;
     }
-
-    setBooting(true);
-    setTimeout(() => {
-      if (pendingAction === 'dashboard') onEnterDashboard();
-      if (pendingAction === 'mentees') onQuickView();
-      if (pendingAction === 'finance') onFinance();
-      if (pendingAction === 'calendar') onEnterDashboard();
-    }, 760);
-  };
-
-  return (
-    <div className="retro-stage flex min-h-screen items-center justify-center p-5 select-none">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10"
-      >
-        <div className="relative w-[min(86vw,310px)] rounded-[36px] border-[4px] border-black bg-[#ded5bd] px-5 pb-7 pt-7 shadow-[18px_26px_30px_rgba(0,0,0,0.30)]">
-          <div className="absolute left-1/2 top-3 h-1.5 w-12 -translate-x-1/2 rounded-full bg-black/80" />
-          <div className="absolute inset-1 rounded-[30px] border-2 border-white/40 pointer-events-none" />
-
-          <div className="relative mb-7 rounded-[12px] border-[4px] border-black bg-black p-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.24)]">
-            <div className="ipod-screen relative h-[166px] overflow-hidden rounded-[7px] bg-[#eff0eb] text-black">
-              <AnimatePresence mode="wait">
-                {booting ? (
-                  <motion.div
-                    key="boot"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 flex flex-col items-center justify-center bg-black text-white"
-                  >
-                    <div className="text-sm font-bold tracking-[0.18em]">LOADING</div>
-                    <div className="mt-4 h-4 w-40 border-2 border-white p-0.5">
-                      <div className="boot-fill h-full bg-white" />
-                    </div>
-                  </motion.div>
-                ) : lockOpen ? (
-                  <motion.div
-                    key="pin"
-                    initial={{ x: 18, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: -18, opacity: 0 }}
-                    className="absolute inset-0 bg-[#eff0eb] p-3"
-                  >
-                    <div className="flex items-center justify-between border-b-2 border-black pb-1 text-[10px] font-bold">
-                      <span>{current.label}</span>
-                      <Battery className="h-4 w-4" />
-                    </div>
-                    <form onSubmit={unlock} className="flex h-[130px] flex-col items-center justify-center text-center">
-                      <Lock className="mb-2 h-5 w-5" />
-                      <div className="text-[11px] font-bold tracking-[0.18em]">PASSCODE</div>
-                      <input
-                        type="password"
-                        autoFocus
-                        maxLength={4}
-                        value={pinInput}
-                        onChange={(event) => setPinInput(event.target.value.replace(/\D/g, ''))}
-                        className={`mt-3 w-28 border-2 border-black bg-white px-2 py-2 text-center text-sm font-bold tracking-[0.35em] outline-none ${
-                          pinError ? 'animate-bounce-x' : ''
-                        }`}
-                        placeholder="----"
-                      />
-                      <button type="submit" className="mt-3 bg-black px-4 py-1.5 text-[10px] font-bold text-white">
-                        ENTER
-                      </button>
-                    </form>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="menu"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 grid grid-cols-[59%_41%]"
-                  >
-                    <div className="border-r border-black/30 bg-[#eff0eb]">
-                      <div className="flex items-center justify-between border-b border-black/25 px-2 py-1 text-[9px] font-bold">
-                        <span>iPod</span>
-                        <span className="flex items-center gap-1">
-                          <Play className="h-3 w-3 fill-black" />
-                          <Battery className="h-4 w-4" />
-                        </span>
-                      </div>
-                      <div className="py-1">
-                        {MENU_ITEMS.map((item, index) => {
-                          const active = selectedIndex === index;
-                          return (
-                            <button
-                              key={item.id}
-                              onClick={() => setSelectedIndex(index)}
-                              className={`flex w-full items-center justify-between px-2 py-2 text-left text-[10px] font-bold ${
-                                active ? 'bg-black text-white' : 'bg-transparent text-black'
-                              }`}
-                            >
-                              <span>{item.label}</span>
-                              {active && <ChevronRight className="h-3.5 w-3.5" />}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="relative overflow-hidden bg-[#f8f8f4]">
-                      <div className="absolute inset-3 rounded-md border border-black/20 bg-[#eff0eb]" />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center px-3 text-center">
-                        <div className="mb-3 h-8 w-8 rounded-full border border-black/30 bg-white shadow-[0_4px_10px_rgba(0,0,0,0.12)]" />
-                        <div className="text-[10px] font-bold leading-4">{current.hint}</div>
-                        <div className="mt-2 text-[9px] font-bold text-black/45">SELECT</div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          <div
-            className="relative mx-auto h-[170px] w-[170px] rounded-full bg-black text-white shadow-[inset_7px_7px_18px_rgba(255,255,255,0.08),inset_-10px_-10px_16px_rgba(0,0,0,0.62),0_8px_12px_rgba(0,0,0,0.28)]"
-            onMouseLeave={() => setHoverZone(null)}
-          >
-            <div
-              className={`pointer-events-none absolute inset-2 rounded-full transition ${
-                hoverZone ? 'bg-white/8' : 'bg-transparent'
-              }`}
-            />
-            <button
-              onMouseEnter={() => setHoverZone('menu')}
-              onClick={() => setLockOpen(false)}
-              className={`absolute left-1/2 top-4 -translate-x-1/2 rounded-full px-4 py-2 text-[9px] font-bold transition ${
-                hoverZone === 'menu' ? 'bg-white text-black' : ''
-              }`}
-            >
-              MENU
-            </button>
-            <button
-              onMouseEnter={() => setHoverZone('prev')}
-              onClick={prev}
-              aria-label="Previous"
-              className={`absolute left-4 top-1/2 -translate-y-1/2 rounded-full p-3 transition ${
-                hoverZone === 'prev' ? 'bg-white text-black' : ''
-              }`}
-            >
-              <Rewind className="h-4 w-4 fill-current" />
-            </button>
-            <button
-              onMouseEnter={() => setHoverZone('next')}
-              onClick={next}
-              aria-label="Next"
-              className={`absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-3 transition ${
-                hoverZone === 'next' ? 'bg-white text-black' : ''
-              }`}
-            >
-              <FastForward className="h-4 w-4 fill-current" />
-            </button>
-            <button
-              onMouseEnter={() => setHoverZone('play')}
-              onClick={next}
-              aria-label="Play pause"
-              className={`absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full p-3 transition ${
-                hoverZone === 'play' ? 'bg-white text-black' : ''
-              }`}
-            >
-              <Pause className="h-4 w-4 fill-current" />
-            </button>
-            <button
-              onMouseEnter={() => setHoverZone('center')}
-              onClick={select}
-              aria-label="Select"
-              className={`absolute left-[51px] top-[51px] h-[68px] w-[68px] rounded-full border-2 border-black bg-[#242424] shadow-[inset_5px_5px_12px_rgba(255,255,255,0.08),inset_-6px_-6px_12px_rgba(0,0,0,0.7)] transition active:scale-[0.96] ${
-                hoverZone === 'center' ? 'ring-4 ring-white/25' : ''
-              }`}
-            />
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  );
+  }, {});
+  return <form id="ipod-credentials" action={action} className="player-form">
+    <input type="hidden" name="mode" value={mode} />
+    {adminEntry && mode === 'signin' && <input type="hidden" name="view" value="admin" />}
+    {mode === 'signup' && <label>Nickname<input name="nickname" autoComplete="nickname" maxLength={60} required /></label>}
+    {mode !== 'update' && <label>Email<input name="email" type="email" autoComplete="email" maxLength={254} required /></label>}
+    {mode !== 'reset' && <label>Password<input name="password" type="password" maxLength={72}
+      minLength={mode === 'signin' ? 1 : 10} autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} required /></label>}
+    <button className="button primary" disabled={pending}>{pending ? 'Please wait…' : label}</button>
+    {result.error && <p role="alert" className="error-text">{result.error}</p>}
+    {result.message && <p role="status">{result.message}</p>}
+  </form>;
 }

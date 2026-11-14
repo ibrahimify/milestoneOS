@@ -1,121 +1,78 @@
-import React from 'react';
-import type { MonthlySalary } from '@/types';
-import { CheckCircle2, Circle, WalletCards, TrendingUp, Hourglass } from 'lucide-react';
+import { useState } from 'react';
+import { Check, Pencil, Plus, Trash2 } from 'lucide-react';
+import { deleteRecord, saveRecord, settlePayment } from '@/app/actions';
+import { formatCurrency, formatDate, localDate } from '@/lib/utils';
+import { currencies, type FinanceSettings, type Payment } from '@/types';
+import { ActionButton, Field, FormDialog, numberValue } from './Forms';
 
-interface FinanceTrackerProps {
-  salary: MonthlySalary;
-  onTogglePayment: (paymentId: string) => void;
-}
-
-export default function FinanceTracker({
-  salary,
-  onTogglePayment,
-}: FinanceTrackerProps) {
-  const totalContract = salary.total;
-  const receivedTotal = salary.payments
-    .filter((p) => p.received)
-    .reduce((sum, p) => sum + p.amount, 0);
-  const pendingTotal = totalContract - receivedTotal;
-  const clearedPct = Math.round((receivedTotal / totalContract) * 100);
-
-  return (
-    <div className="space-y-7 animate-fade-in select-none">
-      <div className="glass-panel-dark relative overflow-hidden rounded-[32px] p-7 text-white md:p-10">
-        <div className="absolute -right-14 -bottom-14 h-56 w-56 rounded-full bg-lime-200/14 blur-3xl" />
-        <div className="max-w-3xl">
-          <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.24em] text-lime-100/80">
-            Finance link
-          </p>
-          <h1 className="text-4xl md:text-6xl font-space font-bold leading-tight tracking-tight">
-            Delivery ledger
-          </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-200/70">
-            Payment tracking is kept close to the mentor workload so logged minutes and settlement state are always in the same system.
-          </p>
-        </div>
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-3">
-        {[
-          { label: 'Gross contract', value: totalContract, detail: 'HUF total', icon: WalletCards },
-          { label: 'Cleared', value: receivedTotal, detail: `${clearedPct}% received`, icon: TrendingUp },
-          { label: 'Pending', value: pendingTotal, detail: 'awaiting deposit', icon: Hourglass },
-        ].map((metric) => {
-          const Icon = metric.icon;
-          return (
-            <div key={metric.label} className="liquid-card rounded-[30px] p-6">
-              <div className="mb-5 flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
-                  {metric.label}
-                </span>
-                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-lime-200">
-                  <Icon className="h-4 w-4" />
-                </span>
-              </div>
-              <div className="text-3xl font-space font-bold tracking-tight text-slate-950">
-                {metric.value.toLocaleString()}
-              </div>
-              <div className="mt-1 text-xs text-slate-500">{metric.detail}</div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="liquid-card overflow-hidden rounded-[30px]">
-        <div className="border-b border-white/50 p-6">
-          <h3 className="text-xl font-space font-bold text-slate-950 tracking-tight">
-            Installment schedule
-          </h3>
-          <p className="mt-1 text-xs text-slate-500">
-            Click a settlement row when money arrives.
-          </p>
-        </div>
-
-        <div className="divide-y divide-white/50">
-          {salary.payments.map((payment, idx) => (
-            <button
-              key={payment.id}
-              onClick={() => onTogglePayment(payment.id)}
-              className={`w-full p-6 text-left transition hover:bg-white/42 ${
-                payment.received ? 'bg-emerald-50/40' : 'bg-white/18'
-              }`}
-            >
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-start gap-4">
-                  <span className="mt-1 flex-shrink-0">
-                    {payment.received ? (
-                      <CheckCircle2 className="w-6 h-6 text-emerald-600" />
-                    ) : (
-                      <Circle className="w-6 h-6 text-slate-300" />
-                    )}
-                  </span>
-
-                  <div>
-                    <div className="text-xs font-space font-bold text-slate-500 mb-1">
-                      Installment #{idx + 1}
-                    </div>
-                    <h4 className="text-lg font-space font-bold text-slate-950 leading-tight mb-1">
-                      {payment.description}
-                    </h4>
-                    <div className="text-xs text-slate-500">
-                      Expected settlement: {payment.dueDate}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="sm:text-right">
-                  <div className="text-2xl font-space font-bold text-slate-950 tracking-tight">
-                    {payment.amount.toLocaleString()} HUF
-                  </div>
-                  <div className={`text-xs font-space font-bold mt-1 ${payment.received ? 'text-emerald-600' : 'text-amber-600'}`}>
-                    {payment.received ? 'Cleared and settled' : 'Pending deposit'}
-                  </div>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
+export default function FinanceTracker({ finance, payments }: { finance: FinanceSettings; payments: Payment[] }) {
+  const [settings, setSettings] = useState(false);
+  const [payment, setPayment] = useState<Payment | 'new'>();
+  const item = payment === 'new' ? undefined : payment;
+  const tax = Math.round(finance.gross * finance.tax_rate) / 100;
+  const received = payments.filter((row) => row.received_at).reduce((sum, row) => sum + row.amount, 0);
+  const scheduled = payments.reduce((sum, row) => sum + row.amount, 0);
+  const progress = scheduled > 0 ? Math.min(100, Math.round(received / scheduled * 100)) : 0;
+  const money = (amount: number) => formatCurrency(amount, finance.currency);
+  const metrics = [
+    { label: 'Gross pay', amount: finance.gross },
+    { label: 'Estimated net pay', amount: finance.gross - tax },
+    { label: 'Money received', amount: received },
+  ];
+  return <div className="view-stack">
+    <div className="section-heading workspace-hero"><h1>Finance</h1>
+      <button className="button hero-secondary" onClick={() => setSettings(true)}>Edit pay and tax</button>
     </div>
-  );
+    <div className="card-grid stats finance-kpis">
+      {metrics.map(({ label, amount }) =>
+        <div className={'panel' + (label === 'Money received' ? ' received-kpi' : '')} key={label}>
+          <p className="muted">{label}</p><strong className="stat-value">{money(amount)}</strong>
+          {label === 'Estimated net pay' && finance.tax_rate > 0 && <p className="muted tax-detail">Estimated tax {money(tax)}</p>}
+        </div>)}
+    </div>
+    <section className="panel">
+      <div className="section-heading">
+        <h2>Installments</h2>
+        <button className="button primary" onClick={() => setPayment('new')}><Plus size={17} />Add installment</button>
+      </div>
+      {!!payments.length && <div className="payment-progress">
+        <p className="muted">{progress}% of {money(scheduled)} scheduled</p>
+        <progress aria-label="Installments paid" max={100} value={progress} aria-valuetext={money(received) + ' of ' + money(scheduled) + ' received'} />
+      </div>}
+      {!payments.length && <p className="empty">No installments added.</p>}
+      {payments.map((row) => <article className="payment-row" key={row.id}>
+        <ActionButton className="icon-button payment-tick" pressed={!!row.received_at}
+          label={(row.received_at ? 'Mark unpaid: ' : 'Mark received: ') + row.description}
+          run={() => settlePayment(row.id, !row.received_at)}>
+          {row.received_at && <Check size={18} aria-hidden="true" />}
+        </ActionButton>
+        <div className="min-w-0"><strong className="break-words">{row.description}</strong>
+          <p className="muted">{row.received_at ? 'Received ' + formatDate(localDate(new Date(row.received_at))) : 'Due ' + formatDate(row.due_date)}</p>
+        </div>
+        <div className="payment-amount"><strong className="amount">{money(row.amount)}</strong></div>
+        <div className="actions payment-tools">
+          <button className="icon-button" title="Edit installment" aria-label={'Edit installment: ' + row.description}
+            onClick={() => setPayment(row)}><Pencil size={16} /></button>
+          <ActionButton className="icon-button danger" label={'Delete installment: ' + row.description}
+            confirm="Delete this installment?" run={() => deleteRecord('payments', row.id)}><Trash2 size={16} /></ActionButton>
+        </div>
+      </article>)}
+    </section>
+    {settings && <FormDialog title="Pay and tax" close={() => setSettings(false)} save={(values) => {
+      if (payments.length && values.currency !== finance.currency && !window.confirm('Change the currency label for all existing installments? Amounts stay the same.')) {
+        return { error: 'Currency change cancelled.' };
+      }
+      return saveRecord('finance_settings', { currency: values.currency, gross: numberValue(values, 'gross'), tax_rate: numberValue(values, 'tax_rate') });
+    }}>
+      <Field name="currency" label="Currency" options={currencies} value={finance.currency} required />
+      <Field name="gross" label="Gross pay" type="number" value={finance.gross} min={0} max={999999999999} step={0.01} required />
+      <Field name="tax_rate" label="Estimated tax rate (%)" type="number" value={finance.tax_rate || undefined} min={0} max={100} step={0.01} />
+    </FormDialog>}
+    {payment && <FormDialog title={item ? 'Edit installment' : 'Add installment'} close={() => setPayment(undefined)}
+      save={(values) => saveRecord('payments', { ...values, amount: numberValue(values, 'amount') }, item?.id)}>
+      <Field name="description" label="Description" value={item?.description} required />
+      <Field name="amount" label={'Amount (' + finance.currency + ')'} type="number" min={0.01} max={999999999999} step={0.01} value={item?.amount} required />
+      <Field name="due_date" label="Due date" type="date" value={item?.due_date || localDate()} required />
+    </FormDialog>}
+  </div>;
 }

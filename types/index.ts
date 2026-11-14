@@ -1,113 +1,97 @@
-export type AppView =
-  | 'login'
-  | 'dashboard'
-  | 'mentee-detail'
-  | 'calendar'
-  | 'tasks'
-  | 'sessions'
-  | 'salary';
+export const yearGroups = ['Freshman', 'Sophomore', 'Junior', 'Senior'] as const;
+export const eventCategories = ['Meeting', 'Deadline', 'Reminder'] as const;
+export const currencies = ['HUF', 'EUR', 'USD', 'GBP'] as const;
 
-export interface Badge {
+export interface Profile {
   id: string;
-  name: string;
-  icon: string;
-  description: string;
-  earned: boolean;
-  earnedDate?: string;
-}
-
-export interface Session {
-  id: string;
-  menteeId: string;
-  sessionNumber?: number;
-  date: string; // ISO date YYYY-MM-DD
-  time: string; // HH:MM
-  duration: number; // minutes
-  topic: string;
-  notes: string; // summary / notes
-  achievements?: string;
-  nextSteps?: string;
-  completed: boolean;
-}
-
-export interface Task {
-  id: string;
-  menteeId: string;
-  title: string;
-  description: string;
-  dueDate: string; // ISO date YYYY-MM-DD
-  completed: boolean;
-  completedDate?: string;
-  priority: 'low' | 'medium' | 'high';
-  category: string;
+  nickname: string;
+  email: string;
+  role: 'admin' | 'mentor';
+  status: 'pending' | 'approved' | 'rejected' | 'suspended';
+  created_at: string;
 }
 
 export interface Mentee {
   id: string;
   name: string;
-  yearGroup: 'Freshman' | 'Sophomore' | 'Junior' | 'Senior';
-  avatar: string; // Lucide icon identifier string (e.g. 'Atom', 'Compass', etc.)
+  year_group: typeof yearGroups[number];
   subject: string;
-  color: string; // hex color
-  bgClass: string; // tailwind bg class
-  level: number;
-  xp: number;
-  xpToNext: number;
-  streak: number;
-  badges: Badge[];
-  goal: string;
-  longTermGoal?: string;
-  nextMilestone: string;
-  joinDate: string;
-  notes: string;
-  totalMinutes: number;
-  hobbies: string[];
-  favSubjects?: string[];
-  images: string[]; // 5 image slots
-  scratchpad: string;
   email: string;
-  skeddaLink: string;
-  suggestedModules?: string[];
-  selectedModules?: string[];
-  status?: string;
-  dislikes?: string[];
-  meetingSchedule?: string;
-  moduleGuidance?: string;
-  nextMeetingPreference?: string;
+  phone: string;
+  skedda_link: string;
+  goal: string;
+  long_term_goal: string;
+  interests: string;
+  preferences: string;
+  next_milestone: string;
+  module_guidance: string;
+  recommended_modules: string;
+  selected_modules: string;
+  notes: string;
+  scratchpad: string;
 }
 
-export interface SalaryPayment {
+export interface Session {
   id: string;
-  amount: number; // in HUF
-  dueDate: string; // ISO date
-  received: boolean;
-  receivedDate?: string;
-  description: string;
+  mentee_id: string;
+  date: string;
+  duration: number;
+  topic: string;
+  notes: string;
+  next_action: string;
+  follow_up: string | null;
+  follow_up_completed_at?: string | null;
 }
 
 export interface CalendarEvent {
   id: string;
-  date: string; // ISO date YYYY-MM-DD
+  mentee_id: string | null;
   title: string;
-  type: 'session' | 'task' | 'payment' | 'deadline';
-  menteeId?: string;
-  color: string;
-  time?: string;
-  description?: string;
+  date: string;
+  start_at: string | null;
+  duration: number;
+  description: string;
+  category: typeof eventCategories[number];
+  shared: boolean;
 }
 
-export interface MonthlySalary {
-  total: number;
-  currency: string;
-  payments: SalaryPayment[];
+export interface FinanceSettings {
+  gross: number;
+  tax_rate: number;
+  currency: typeof currencies[number];
+}
+
+export interface Payment {
+  id: string;
+  description: string;
+  amount: number;
+  due_date: string;
+  received_at: string | null;
+}
+
+export interface ModuleCategory {
+  id: string;
+  name: string;
 }
 
 export interface ModuleSyllabus {
-  code: string;
+  id: string;
+  category_id: string;
   title: string;
   division: string;
-  coreFor: string;
-  formLink: string;
-  teacher: string;
-  level: string;
+  faculty: string;
+  description: string;
+  form_link: string;
+}
+
+export interface WorkspaceData {
+  profile: Profile;
+  mentees: Mentee[];
+  sessions: Session[];
+  events: CalendarEvent[];
+  finance: FinanceSettings;
+  payments: Payment[];
+  categories: ModuleCategory[];
+  modules: ModuleSyllabus[];
+  accounts: Profile[];
 }
