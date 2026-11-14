@@ -201,7 +201,9 @@ button:disabled { opacity: .55; cursor: default; }
 .workspace .stats .stat-value { font-size: clamp(1.4rem, 3vw, 2rem); }
 .workspace .stats .muted { display: flex; justify-content: space-between; flex-direction: row-reverse; font-size: .73rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
 .workspace .stats .muted svg { flex-shrink: 0; }
-.dashboard-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.3rem; }
+.dashboard-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 1.3rem; }
+.dashboard-preview-row { min-height: 4.4rem; }
+.dashboard-view-all { margin-top: .5rem; }
 .workspace .row-button { border: 0; background: #efeeeb; border-radius: 14px; padding: .8rem; }
 .workspace .row-button:hover { background: #050505; color: white; }
 .workspace .row-button:hover .muted { color: #ddd; }
@@ -319,9 +321,9 @@ button:disabled { opacity: .55; cursor: default; }
   .minutes-pill svg { display: none; }
 }
 @media (pointer: fine) and (hover: hover) and (forced-colors: none) {
-  .workspace { cursor: url('/milestone-arrow.svg') 5 4, auto; }
-  .workspace :is(a, button, summary):not(:disabled) { cursor: url('/milestone-hand.svg') 13 4, pointer; }
-  .workspace :is(input, textarea) { cursor: text; }
+  :is(.workspace, .entry-stage) { cursor: url('/milestone-arrow.svg') 5 4, auto; }
+  :is(.workspace, .entry-stage) :is(a, button, summary):not(:disabled) { cursor: url('/milestone-hand.svg') 13 4, pointer; }
+  :is(.workspace, .entry-stage) :is(input, textarea) { cursor: text; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .workspace-enter { animation: workspace-enter 220ms ease-out; }

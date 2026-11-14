@@ -1,14 +1,8 @@
 # Milestone OS
 
-Milestone OS is a private workspace for mentors to manage mentees, sessions, follow-ups, calendars, and payments. It runs on Next.js and Supabase.
+Milestone OS gives mentors one place to review a mentee’s goals, record sessions, and follow up on agreed actions. Program administrators can approve accounts and maintain a shared calendar and module catalogue.
 
-![Milestone OS dashboard with sample mentees and follow-ups](docs/screenshots/dashboard.png)
-
-## Why it exists
-
-A mentor should be able to open a mentee's profile before a meeting and see what happened last time, what comes next, and who needs a follow-up. Milestone OS keeps that work in one place. Administrators approve mentor accounts, share deadlines, and maintain a common module catalogue.
-
-The same workflow can support other mentoring programs. Separate program workspaces and delegated administration are future possibilities. The current release provides private mentor data and a shared catalogue within one installation.
+[Open Milestone OS](https://milestone-os-two.vercel.app)
 
 ## What you can do
 
@@ -16,18 +10,25 @@ The same workflow can support other mentoring programs. Separate program workspa
 - Record sessions and due dates. Mark a next action done to clear it from the dashboard, or reopen it from its session log.
 - Track meetings and deadlines, open Skedda, and export events to Google or Apple Calendar.
 - Record installments and see gross pay, estimated net pay, and money received.
-- Use the admin account to approve mentors, publish shared calendar events, and manage modules.
+- Approve mentor accounts, publish shared events, and manage modules as an administrator.
 
 ## Screenshots
 
-Screenshots use sample data.
+Browser screenshots use sample data and show a single viewport at 100% zoom.
 
-![Session logs showing notes, a next action, and its follow-up date](docs/screenshots/session-log.png)
+### Desktop dashboard · 1440 × 960
 
-<p>
-  <img src="docs/screenshots/sign-in.png" alt="Click-wheel sign-in screen" width="300">
-  <img src="docs/screenshots/mobile-navigation.png" alt="Mobile menu with the Report a bug button" width="240">
-</p>
+![Desktop dashboard with mentee previews, recent session logs, and follow-ups](docs/screenshots/dashboard.png)
+
+### Mobile mentee profiles · 390 × 844
+
+![Mobile mentee profiles with a current goal on each card](docs/screenshots/mentee-profiles-mobile.png)
+
+## Tech stack
+
+- Next.js, React, TypeScript, and Tailwind CSS for the app
+- Supabase Auth and PostgreSQL with row-level security
+- Vercel for hosting, Resend for signup alerts, and GitHub Actions for CI
 
 ## Run locally
 
@@ -42,8 +43,12 @@ Open [Milestone OS locally](http://localhost:3000). Run `npm run lint`, `npm run
 
 ## Deploy
 
-The [live app](https://milestone-os-two.vercel.app) deploys from the `master` branch of this repository.
+Vercel deploys the `master` branch of this repository to production.
 
 Import the repository into Vercel and add the variables from [`.env.example`](.env.example) in the project settings. Use the production URL for `APP_URL` and the Supabase Auth Site URL. Follow the [setup guide](docs/setup.md) for database migrations, email delivery, and the first administrator.
 
 [System diagrams](docs/architecture.md) · [Release notes](https://github.com/ibrahimify/milestoneOS/releases) · [Report a bug](https://github.com/ibrahimify)
+
+## License
+
+Copyright © 2026 Muhammad Ibrahim Shoeb. All rights reserved. See [LICENSE](LICENSE).

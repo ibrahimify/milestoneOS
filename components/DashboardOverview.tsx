@@ -4,6 +4,8 @@ import type { WorkspaceData } from '@/types';
 import { formatCurrency, formatDate, localDate, newestSessionFirst } from '@/lib/utils';
 import type { View } from './Sidebar';
 
+const previewLimit = 4;
+
 export default function DashboardOverview({ data, navigate, openMentee }: {
   data: WorkspaceData; navigate: (view: View) => void; openMentee: (id: string, sessionId?: string) => void;
 }) {
@@ -14,7 +16,7 @@ export default function DashboardOverview({ data, navigate, openMentee }: {
   const followUps = data.sessions.filter((item) => item.follow_up && !item.follow_up_completed_at)
     .sort((a, b) => a.follow_up!.localeCompare(b.follow_up!)).slice(0, 3);
   const outstanding = data.payments.filter((item) => !item.received_at).reduce((sum, item) => sum + item.amount, 0);
-  const recent = [...data.sessions].sort(newestSessionFirst).slice(0, 4);
+  const recent = [...data.sessions].sort(newestSessionFirst).slice(0, previewLimit);
   const stats = [
     { label: 'Mentees', value: data.mentees.length, Icon: Users },
     { label: 'Session logs', value: data.sessions.length, Icon: NotebookPen },
@@ -38,17 +40,20 @@ export default function DashboardOverview({ data, navigate, openMentee }: {
       <section className="panel">
         <div className="section-heading"><h2>Mentees</h2><Users size={19} aria-hidden="true" /></div>
         {!data.mentees.length && <p className="empty">No mentees yet.</p>}
-        {data.mentees.slice(0, 4).map((mentee) => <button key={mentee.id} className="record-row row-button"
+        {data.mentees.slice(0, previewLimit).map((mentee) => <button key={mentee.id} className="record-row row-button dashboard-preview-row"
           onClick={() => openMentee(mentee.id)}>
-          <div><strong>{mentee.name}</strong><p className="muted line-clamp-1">{mentee.next_milestone || mentee.goal || mentee.year_group}</p></div>
+          <div><strong className="block truncate">{mentee.name}</strong><p className="muted truncate">{mentee.goal.trim() || mentee.year_group}</p></div>
           <ChevronRight size={17} className="shrink-0" />
         </button>)}
+        {data.mentees.length > previewLimit && <button className="button subtle dashboard-view-all" onClick={() => navigate('mentees')}>
+          View all {data.mentees.length} mentees<ChevronRight size={16} aria-hidden="true" />
+        </button>}
       </section>
         <section className="panel">
           <div className="section-heading"><h2>Recent logs</h2><Clock size={19} aria-hidden="true" /></div>
           {!recent.length && <p className="empty">No logs yet.</p>}
-          {recent.map((session) => <button className="record-row row-button" key={session.id} onClick={() => openMentee(session.mentee_id, session.id)}>
-            <div><strong>{session.topic}</strong><p className="muted">
+          {recent.map((session) => <button className="record-row row-button dashboard-preview-row" key={session.id} onClick={() => openMentee(session.mentee_id, session.id)}>
+            <div><strong className="block truncate">{session.topic}</strong><p className="muted truncate">
               {data.mentees.find((mentee) => mentee.id === session.mentee_id)?.name} · {formatDate(session.date)}
             </p></div>
             <span className="shrink-0">{session.duration} min</span>

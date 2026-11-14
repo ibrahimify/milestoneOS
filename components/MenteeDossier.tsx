@@ -46,6 +46,7 @@ export default function MenteeDossier({ mentee, sessions, modules, initialSessio
         <div className="min-w-0">
           <p className="dossier-year">{mentee.year_group}{mentee.subject && ' · ' + mentee.subject}</p>
           <h1>{mentee.name}</h1>
+          {mentee.goal.trim() && <p className="muted mt-2 line-clamp-2 break-words">{mentee.goal.trim()}</p>}
         </div>
       </div>
       <div className="dossier-minutes"><Clock size={17} aria-hidden="true" /><strong>{minutes} min</strong>

@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
   <defs>
     <filter id="glow" x="-35%" y="-35%" width="170%" height="170%">
-      <feDropShadow dx="0" dy="0" stdDeviation=".8" flood-color="#71706d" flood-opacity=".46"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="1.15" flood-color="#687687" flood-opacity=".45"/>
     </filter>
   </defs>
   <path d="M5 4 26 16 16.5 19.1 11.5 27Z" fill="#171717" stroke="#f5f4ef" stroke-width="1" stroke-linejoin="round" filter="url(#glow)"/>

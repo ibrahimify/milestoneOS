@@ -41,7 +41,6 @@ export default function MenteeGallery({ mentees, sessions, openMentee, profile }
         const logs = sessions.filter((session) => session.mentee_id === item.id);
         const last = logs.reduce<Session | undefined>((latest, log) => !latest || log.date > latest.date ? log : latest, undefined);
         const followUp = logs.filter((log) => !log.follow_up_completed_at).map(({ follow_up }) => follow_up).filter(Boolean).sort()[0];
-        const priority = item.next_milestone || item.goal;
         return <button className="panel mentee-card" key={item.id} onClick={() => openMentee(item.id)}>
         <span className="flex items-start justify-between gap-3">
           <span className="min-w-0">
@@ -50,9 +49,8 @@ export default function MenteeGallery({ mentees, sessions, openMentee, profile }
           </span>
           <span className="profile-arrow"><ArrowUpRight size={19} aria-hidden="true" /></span>
         </span>
-        <span className="mentee-card-focus"><span className="card-caption"><Target size={15} aria-hidden="true" />
-          {item.next_milestone ? 'Next milestone' : 'Current goal'}</span>
-          <span className="mt-1 block line-clamp-2 break-words">{priority || 'Add a goal in Profile + goals'}</span>
+        <span className="mentee-card-focus"><span className="card-caption"><Target size={15} aria-hidden="true" />Current goal</span>
+          <span className="mt-1 block line-clamp-2 break-words">{item.goal.trim() || 'Add a goal in Profile + goals'}</span>
         </span>
         <span className="mentee-card-meta">
           <span><NotebookPen size={15} aria-hidden="true" />{last ? 'Last session · ' + formatDate(last.date) : 'No sessions logged'}</span>
