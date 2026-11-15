@@ -201,7 +201,7 @@ button:disabled { opacity: .55; cursor: default; }
 .workspace .stats .stat-value { font-size: clamp(1.4rem, 3vw, 2rem); }
 .workspace .stats .muted { display: flex; justify-content: space-between; flex-direction: row-reverse; font-size: .73rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
 .workspace .stats .muted svg { flex-shrink: 0; }
-.dashboard-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 1.3rem; }
+.dashboard-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 1.3rem; }
 .dashboard-preview-row { min-height: 4.4rem; }
 .dashboard-view-all { margin-top: .5rem; }
 .workspace .row-button { border: 0; background: #efeeeb; border-radius: 14px; padding: .8rem; }
@@ -222,6 +222,7 @@ button:disabled { opacity: .55; cursor: default; }
 .mentee-card-meta { display: flex; flex-wrap: wrap; gap: .6rem 1.1rem; font-size: .8rem; color: var(--muted); }
 .mentee-card-meta > span { display: inline-flex; align-items: center; gap: .4rem; }
 .dossier-avatar, .dossier-minutes { display: inline-flex; align-items: center; gap: .55rem; border: 1px solid #ffffff38; background: #ffffff13; border-radius: 16px; padding: .85rem; }
+.dossier-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1rem; }
 .dossier-year { font-size: .76rem; color: #ccc; font-weight: 650; margin-bottom: .35rem; }
 .dossier-minutes span { color: #ccc; font-size: .8rem; }
 .dossier-columns, .dossier-fields, .session-columns { display: grid; gap: 1rem; align-items: start; }
@@ -320,10 +321,22 @@ button:disabled { opacity: .55; cursor: default; }
   .minutes-pill { padding: .5rem .55rem; white-space: nowrap; }
   .minutes-pill svg { display: none; }
 }
+.cursor-glow { display: none; }
 @media (pointer: fine) and (hover: hover) and (forced-colors: none) {
-  :is(.workspace, .entry-stage) { cursor: url('/milestone-arrow.svg') 5 4, auto; }
-  :is(.workspace, .entry-stage) :is(a, button, summary):not(:disabled) { cursor: url('/milestone-hand.svg') 13 4, pointer; }
-  :is(.workspace, .entry-stage) :is(input, textarea) { cursor: text; }
+  :is(.workspace, .entry-stage),
+  :is(.workspace, .entry-stage) :is(a, button, summary, [role=button]):not(:disabled) { cursor: none; }
+  :is(.workspace, .entry-stage) :is(input, textarea, [contenteditable=true]) { cursor: text; }
+
+  .cursor-glow {
+    display: block; position: fixed; top: 0; left: 0; width: 32px; height: 32px; z-index: 2147483647;
+    pointer-events: none; opacity: 0; transform: translate3d(-48px, -48px, 0);
+    transition: opacity 90ms ease, filter 120ms ease;
+    filter: drop-shadow(0 0 2px #71839c99) drop-shadow(0 0 5px #71839c42);
+  }
+  .cursor-glow[data-visible=true] { opacity: 1; }
+  .cursor-glow[data-interactive=true] { filter: drop-shadow(0 0 2px #71839cb8) drop-shadow(0 0 6px #71839c52); }
+  .cursor-glow svg { display: block; width: 32px; height: 32px; overflow: visible; transform: translate(-5px, -4px); }
+  .cursor-glow path { fill: #171717; stroke: #f7f6f2; stroke-width: 1.15; stroke-linejoin: round; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .workspace-enter { animation: workspace-enter 220ms ease-out; }
@@ -516,6 +529,8 @@ button:disabled { opacity: .55; cursor: default; }
 }
 @media (max-width: 560px) {
   .dashboard-columns { grid-template-columns: minmax(0, 1fr); }
+  .dossier-hero { grid-template-columns: minmax(0, 1fr); }
+  .dossier-minutes { justify-self: start; }
   .dossier-fields, .dossier-columns > .view-stack, .session-columns { grid-template-columns: 1fr; }
   .calendar-header { display: grid; }
   .payment-row { grid-template-columns: auto minmax(0, 1fr) auto; }

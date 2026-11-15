@@ -28,7 +28,7 @@ Browser screenshots use sample data and show a single viewport at 100% zoom.
 
 - Next.js, React, TypeScript, and Tailwind CSS for the app
 - Supabase Auth and PostgreSQL with row-level security
-- Vercel for hosting, Resend for signup alerts, and GitHub Actions for CI
+- Vercel for hosting, optional Resend signup alerts, and GitHub Actions for CI
 
 ## Run locally
 
@@ -39,7 +39,7 @@ npm ci
 npm run dev
 ```
 
-Open [Milestone OS locally](http://localhost:3000). Run `npm run lint`, `npm run typecheck`, and `npm test` before submitting changes. CI also runs the production build.
+Open [Milestone OS locally](http://localhost:3000). Run `npm run lint`, `npm run typecheck`, and `npm test` before submitting changes. CI also runs the production build and a Playwright layout regression check at desktop and mobile widths.
 
 ## Deploy
 

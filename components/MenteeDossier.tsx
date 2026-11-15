@@ -40,13 +40,12 @@ export default function MenteeDossier({ mentee, sessions, modules, initialSessio
           return result;
         }}><Trash2 size={15} aria-hidden="true" />Delete mentee</ActionButton>
     </div>
-    <div className="section-heading workspace-hero">
+    <div className="workspace-hero dossier-hero">
       <div className="flex min-w-0 items-center gap-4">
         <span className="dossier-avatar"><UserRound size={24} aria-hidden="true" /></span>
         <div className="min-w-0">
           <p className="dossier-year">{mentee.year_group}{mentee.subject && ' · ' + mentee.subject}</p>
           <h1>{mentee.name}</h1>
-          {mentee.goal.trim() && <p className="muted mt-2 line-clamp-2 break-words">{mentee.goal.trim()}</p>}
         </div>
       </div>
       <div className="dossier-minutes"><Clock size={17} aria-hidden="true" /><strong>{minutes} min</strong>

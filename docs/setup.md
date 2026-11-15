@@ -1,5 +1,20 @@
 # Setup and account settings
 
+## Environment variables
+
+| Variable | Visibility | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Browser-safe | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser-safe | Restricted client key used with row-level security |
+| `APP_URL` | Server | Deployed application URL used in links and redirects |
+| `SUPABASE_SECRET_KEY` | Server secret | Privileged access for queued signup notifications |
+| `RESEND_API_KEY` | Server secret | Sends optional signup alerts |
+| `SIGNUP_EMAIL_FROM` | Server | Verified sender for signup alerts |
+| `SIGNUP_EMAIL_TO` | Server | Administrator who receives signup alerts |
+| `CRON_SECRET` | Server secret | Protects the notification retry endpoint |
+
+Never expose server secret values with a `NEXT_PUBLIC_` prefix or commit them to the repository. Signup alerts require all notification variables and the Vercel Cron configuration in `vercel.json`.
+
 ## Supabase
 
 1. Create a Supabase project. In its **Connect** dialog, copy the project URL and publishable key to `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env.local`. Set `APP_URL` to the application URL.
